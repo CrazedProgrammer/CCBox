@@ -1,0 +1,6 @@
+(define-native drawPixel)
+(define-native drawLine)
+(define-native drawImage)
+(define-native loadImage)
+(define-native drawBox)
+(define-native drawFilledBox)

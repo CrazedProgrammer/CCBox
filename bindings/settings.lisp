@@ -1,0 +1,7 @@
+(define-native set)
+(define-native get)
+(define-native load)
+(define-native save)
+(define-native clear)
+(define-native unset)
+(define-native getNames)

@@ -1,0 +1,20 @@
+local fs = fs or {}
+return {
+	["combine"] =      { tag = "var", contents = "fs.combine",      value = fs.combine,      },
+	["complete"] =     { tag = "var", contents = "fs.complete",     value = fs.complete,     },
+	["copy"] =         { tag = "var", contents = "fs.copy",         value = fs.copy,         },
+	["delete"] =       { tag = "var", contents = "fs.delete",       value = fs.delete,       },
+	["exists"] =       { tag = "var", contents = "fs.exists",       value = fs.exists,       },
+	["find"] =         { tag = "var", contents = "fs.find",         value = fs.find,         },
+	["getDir"] =       { tag = "var", contents = "fs.getDir",       value = fs.getDir,       },
+	["getDrive"] =     { tag = "var", contents = "fs.getDrive",     value = fs.getDrive,     },
+	["getFreeSpace"] = { tag = "var", contents = "fs.getFreeSpace", value = fs.getFreeSpace, },
+	["getName"] =      { tag = "var", contents = "fs.getName",      value = fs.getName,      },
+	["getSize"] =      { tag = "var", contents = "fs.getSize",      value = fs.getSize,      },
+	["isDir"] =        { tag = "var", contents = "fs.isDir",        value = fs.isDir,        },
+	["isReadOnly"] =   { tag = "var", contents = "fs.isReadOnly",   value = fs.isReadOnly,   },
+	["list"] =         { tag = "var", contents = "fs.list",         value = fs.list,         },
+	["makeDir"] =      { tag = "var", contents = "fs.makeDir",      value = fs.makeDir,      },
+	["move"] =         { tag = "var", contents = "fs.move",         value = fs.move,         },
+	["open"] =         { tag = "var", contents = "fs.open",         value = fs.open,         },
+}

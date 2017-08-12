@@ -1,0 +1,22 @@
+local colors = colors or {}
+return {
+	["black"] =     { tag = "var", contents = "colors.black",     value = colors.black,     },
+	["blue"] =      { tag = "var", contents = "colors.blue",      value = colors.blue,      },
+	["brown"] =     { tag = "var", contents = "colors.brown",     value = colors.brown,     },
+	["combine"] =   { tag = "var", contents = "colors.combine",   value = colors.combine,   },
+	["cyan"] =      { tag = "var", contents = "colors.cyan",      value = colors.cyan,      },
+	["gray"] =      { tag = "var", contents = "colors.gray",      value = colors.gray,      },
+	["green"] =     { tag = "var", contents = "colors.green",     value = colors.green,     },
+	["lightBlue"] = { tag = "var", contents = "colors.lightBlue", value = colors.lightBlue, },
+	["lightGray"] = { tag = "var", contents = "colors.lightGray", value = colors.lightGray, },
+	["lime"] =      { tag = "var", contents = "colors.lime",      value = colors.lime,      },
+	["magenta"] =   { tag = "var", contents = "colors.magenta",   value = colors.magenta,   },
+	["orange"] =    { tag = "var", contents = "colors.orange",    value = colors.orange,    },
+	["pink"] =      { tag = "var", contents = "colors.pink",      value = colors.pink,      },
+	["purple"] =    { tag = "var", contents = "colors.purple",    value = colors.purple,    },
+	["red"] =       { tag = "var", contents = "colors.red",       value = colors.red,       },
+	["subtract"] =  { tag = "var", contents = "colors.subtract",  value = colors.subtract,  },
+	["test"] =      { tag = "var", contents = "colors.test",      value = colors.test,      },
+	["white"] =     { tag = "var", contents = "colors.white",     value = colors.white,     },
+	["yellow"] =    { tag = "var", contents = "colors.yellow",    value = colors.yellow,    },
+}

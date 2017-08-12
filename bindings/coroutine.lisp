@@ -1,0 +1,6 @@
+(define-native status)
+(define-native resume)
+(define-native create)
+(define-native yield)
+(define-native wrap)
+(define-native running)
