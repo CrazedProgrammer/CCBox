@@ -10,30 +10,29 @@
   (let* [(cid 0)
          (label $"computer-${cid}")
          (env (create-env))
+         (boot-code-handle (fs/open boot-file "r"))
+         (boot-code (self boot-code-handle :readAll))
+         (boot-coroutine (coroutine/create (load boot-code "ccjam-bios.lua" "t" env)))
          (computer { :id cid
                      :label label
                      :env env
-                     :boot-file boot-file})]
-    (.<! computer :coroutine
-                  (coroutine/create (lambda () (run computer))))
+                     :coroutine boot-coroutine})]
+    (self boot-code-handle :close)
     computer))
-
-(defun run (computer) :hidden
-  (let* [(handle (fs/open (.> computer :boot-file) "r"))
-         (code ((.> handle :readAll)))]
-    ((.> handle :close))
-    ((load code "ccjam-bios.lua" "t" (.> computer :env)))))
 
 (defun next (computer args)
   (with (result (list (coroutine/resume (.> computer :coroutine) (unpack args))))
     (if (= (car result) false)
       (error! (.. "computer panicked! error: \n" (cadr result)))
-      (unpack (cddr result)))))
+      (progn
+        (when (caddr result)
+          (print! (.. "args: " (pretty args) " result: " (pretty result))))
+        (unpack (cddr result))))))
 
 
 (define api-blacklist :hidden
  { ; "gps" "parallel" "peripheral" "settings"
-    :colors '() :colours '() :disk '() :help '()
+    :colors '() :colours '() :disk '() :help '() :settings '()
     :io '() :keys '() :paintutils '() :term '() :shell '()
     :rednet '() :textutils '() :vector '() :window '()
     :os '("shutdown") })
@@ -51,6 +50,7 @@
              (lambda (a)
                (if (= (type a) "string")
                  {}
-                 (.> global :getmetatable))))
+                 ((.> global :getmetatable)))))
     (.<! global :term { :native (lambda () window) })
+    (.<! global :os :shutdown (lambda () (coroutine/yield "emu/shutdown")))
     env))
