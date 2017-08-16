@@ -32,7 +32,7 @@
 
 (defun next (computer args)
   (with (event (car args))
-    (when true ;(elem? event event-whitelist)
+    (when (elem? event event-whitelist)
       (with (result (list (coroutine/resume (.> computer :coroutine) (unpack args))))
         (if (= (car result) false)
           (error! (.. "computer panicked! error: \n" (cadr result)))
@@ -45,10 +45,10 @@
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "loadstring" "pairs" "_VERSION" "peripheral"
            "ipairs" "rawequal" "xpcall" "fs" "_CC_DEFAULT_SETTINGS" "unpack" "bitop" "os"
-           "setmetatable" "rawset" "rs" "http" "rawget" "table" "bit32"
-           "disk" "_HOST" "getmetatable" "bit" "printError" "sleep" "assert" "error" "pcall"
-           "socket" "tostring" "next" "tonumber" "redstone" "math" "_RUNTIME" "coroutine"
-           "biginteger" "loadfile" "getfenv" "dofile" "select" "load" "print" "data" ))
+           "setmetatable" "rawset" "http" "rawget" "table" "bit32"
+           "_HOST" "getmetatable" "bit" "assert" "error" "pcall"
+           "socket" "tostring" "next" "tonumber" "math" "_RUNTIME" "coroutine"
+           "biginteger" "loadfile" "getfenv" "dofile" "select" "load" "data" ))
 
 (defun create-env (computer) :hidden
   (let* [(global (deep-copy _G))
