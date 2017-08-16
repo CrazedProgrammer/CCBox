@@ -25,34 +25,43 @@
      (self boot-code-handle :close)
      (coroutine/create (load boot-code "ccjam-bios.lua" "t" env))))
 
+(define event-whitelist :hidden
+        '( "timer" "alarm" "terminate" "http_success" "http_failure"
+           "paste" "char" "key" "key_up"
+           "mouse_click" "mouse_up" "mouse_scroll" "mouse_drag" ))
 
 (defun next (computer args)
-  (with (result (list (coroutine/resume (.> computer :coroutine) (unpack args))))
-    (if (= (car result) false)
-      (error! (.. "computer panicked! error: \n" (cadr result)))
-      (if (= (.> computer :running) false)
-        (error! "computer shutdown!")
-        (progn
-          (debug/log! (.. "event: " (pretty args)))
-          (unpack (cdr result)))))))
+  (with (event (car args))
+    (when true ;(elem? event event-whitelist)
+      (with (result (list (coroutine/resume (.> computer :coroutine) (unpack args))))
+        (if (= (car result) false)
+          (error! (.. "computer panicked! error: \n" (cadr result)))
+          (if (= (.> computer :running) false)
+            (error! "computer shutdown!")
+            (progn
+              (debug/log! (.. "event: " (pretty args)))
+              (unpack (cdr result)))))))))
 
-
-(define api-blacklist :hidden
- { ; "gps" "parallel" "peripheral" "settings"
-    :colors '() :colours '() :disk '() :help '() :settings '()
-    :io '() :keys '() :paintutils '() :term '() :shell '()
-    :rednet '() :textutils '() :vector '() :window '()
-    :os '("shutdown" "reboot") })
+(define env-whitelist :hidden
+        '( "type" "setfenv" "string" "loadstring" "pairs" "_VERSION" "peripheral"
+           "ipairs" "rawequal" "xpcall" "fs" "_CC_DEFAULT_SETTINGS" "unpack" "bitop" "os"
+           "setmetatable" "rawset" "rs" "http" "rawget" "table" "bit32"
+           "disk" "_HOST" "getmetatable" "bit" "printError" "sleep" "assert" "error" "pcall"
+           "socket" "tostring" "next" "tonumber" "redstone" "math" "_RUNTIME" "coroutine"
+           "biginteger" "loadfile" "getfenv" "dofile" "select" "load" "print" "data" ))
 
 (defun create-env (computer) :hidden
   (let* [(global (deep-copy _G))
          (env (setmetatable { :_G global } { :__index global }))
          (term (term/current))]
-    (for-each api-name (keys api-blacklist)
-      (if (= (n (.> api-blacklist api-name)) 0)
-        (set-idx! global api-name nil)
-        (for-each api-item (.> api-blacklist api-name)
-          (set-idx! (.> global api-name) api-item nil))))
+    (map (lambda (name)
+           (with (contents (.> _G name))
+             (.<! global name
+               (case (type contents)
+                 ["table" (merge contents {})]
+                 [_ contents]))))
+         env-whitelist)
+    (.<! global :_G global)
     (.<! global :getmetatable
              (lambda (a)
                (if (= (type a) "string")
