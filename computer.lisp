@@ -5,14 +5,15 @@
 (import bindings/window window)
 (import bindings/term term)
 (import debug)
-(import util (deep-copy))
+(import vfs (create-vfs))
 
-(defun create (boot-file)
+(defun create (boot-file vfs-mounts)
   (let* [(cid 0)
          (label $"computer-${cid}")
          (computer { :id cid
                      :label label
-                     :boot-file boot-file })
+                     :boot-file boot-file
+                     :vfs (create-vfs vfs-mounts) })
          (env (create-env computer))]
       ;; todo: fix this paradox
       (.<! computer :env env)
@@ -44,16 +45,18 @@
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "loadstring" "pairs" "_VERSION" "peripheral"
-           "ipairs" "rawequal" "xpcall" "fs" "_CC_DEFAULT_SETTINGS" "unpack" "bitop" "os"
+           "ipairs" "rawequal" "xpcall" "_CC_DEFAULT_SETTINGS" "unpack" "bitop" "os"
            "setmetatable" "rawset" "http" "rawget" "table" "bit32"
            "_HOST" "getmetatable" "bit" "assert" "error" "pcall"
            "socket" "tostring" "next" "tonumber" "math" "_RUNTIME" "coroutine"
-           "biginteger" "loadfile" "getfenv" "dofile" "select" "load" "data" ))
+           "biginteger" "loadfile" "getfenv" "dofile" "select" "load" "data"
+           "settings"
+           "read" "rs" "disk" "printError" "sleep" "redstone" "write" "print" ))
 
 (defun create-env (computer) :hidden
-  (let* [(global (deep-copy _G))
+  (let* [(global {})
          (env (setmetatable { :_G global } { :__index global }))
-         (term (term/current))]
+         (term (merge (term/current) {}))]
     (map (lambda (name)
            (with (contents (.> _G name))
              (.<! global name
@@ -70,4 +73,5 @@
     (.<! global :term { :native (lambda () term) })
     (.<! global :os :shutdown (lambda () (.<! computer :running false)))
     (.<! global :os :reboot (lambda () (.<! computer :coroutine (create-coroutine (.> computer :boot-file) (.> computer :env)))))
+    (.<! global :fs (.> computer :vfs))
     env))
