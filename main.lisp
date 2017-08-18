@@ -23,12 +23,27 @@
             :default "bios.lua"
             :narg 1)
 
+          (add-argument! spec '("--disable-net")
+            :name "disable-networking"
+            :help "Disables networking (http, socket).")
+
+          (add-argument! spec '("--enable-rs")
+            :name "enable-redstone"
+            :help "Enables redstone passthrough.")
+
+          (add-argument! spec '("--enable-per")
+            :name "enable-peripheral"
+            :help "Enables peripheral passthrough.")
+
+          (add-argument! spec '("--enable-disk")
+            :name "enable-disk"
+            :help "Enables disk drive passthrough.")
+
           (parse! spec)))
 
 (defun run ()
-  (with (comp (computer/create (shell/resolve (.> args :boot-file)) (.> args :vfs-mounts)))
-    (while true
+  (with (comp (computer/create args))
+    (while (.> comp :running)
       (computer/next comp (list (os/pullEventRaw))))))
 
-;(print! (pretty ((.> (vfs/create-vfs (.> args :vfs-mounts)) :list) "////rom/apis")))
 (run)

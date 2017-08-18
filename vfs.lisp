@@ -90,4 +90,4 @@
                 (error! "permission denied.")
                 (fs/delete $"~{dir}/~{path}")))
     :open (lambda (path mode)
-              (fs/open $"~{dir}/~{path}")) })
+              (fs/open $"~{dir}/~{path}" mode)) })
