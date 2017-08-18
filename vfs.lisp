@@ -73,7 +73,7 @@
     :exists (lambda (path)
               (fs/exists $"~{dir}/~{path}"))
     :isDir (lambda (path)
-             (fs/exists $"~{dir}/~{path}"))
+             (fs/isDir $"~{dir}/~{path}"))
     :isReadOnly (lambda (path)
                   (or read-only
                     (fs/isReadOnly $"~{dir}/~{path}")))

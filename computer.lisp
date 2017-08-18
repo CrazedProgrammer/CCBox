@@ -78,7 +78,7 @@
                (if (= (type a) "string")
                  {}
                  ((.> global :getmetatable)))))
-    (.<! global :term { :native (const term) })
+    (.<! global :term term )
     (.<! global :disk (if (.> spec :enable-disk)
                         (.> _G :disk)
                         (const-fun-struct
@@ -102,4 +102,6 @@
     (.<! global :rs (.> global :redstone))
     (.<! global :os :shutdown (lambda () (.<! computer :running false)))
     (.<! global :os :reboot (lambda () (.<! computer :coroutine (create-coroutine (.> computer :boot-file) env))))
+    (.<! global :fs (.> computer :vfs))
+    (.<! global :nprint (.> global :print))
     env))
