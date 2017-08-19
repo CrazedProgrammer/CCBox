@@ -14,7 +14,7 @@ You can exit a VM by running `shutdown`.
 There are many different options available:  
   
 ![](https://img.crzd.me/ccbox.png)  
-Note that the tempfs mount type is currently not implemented due to time constraints.
+Note that the `tempfs` mount type is currently not implemented due to time constraints.
 
 # Building
 Compiling is done with the [Urn](https://gitlab.com/urn/urn) compiler:  
