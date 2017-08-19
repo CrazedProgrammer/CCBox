@@ -11,6 +11,7 @@ Get a boot file ([bios.lua](https://github.com/dan200/ComputerCraft/blob/master/
 `wget https://raw.githubusercontent.com/dan200/ComputerCraft/master/src/main/resources/assets/computercraft/lua/bios.lua bios.lua`  
 And then simply run `ccjam`.  
 There are many different options available:  
+  
 ![](https://img.crzd.me/ccbox.png)
 
 # Building
