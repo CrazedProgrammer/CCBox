@@ -1,2 +1,2 @@
-# CCJam-2017
+# CCBox
 My entry for CCJam 2017.
