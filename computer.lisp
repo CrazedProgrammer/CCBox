@@ -5,6 +5,7 @@
 (import bindings/window window)
 (import bindings/term term)
 (import bindings/os os)
+(import bindings/shell shell)
 (import debug)
 (import vfs (create-vfs))
 
@@ -23,16 +24,18 @@
       computer))
 
 (defun create-coroutine! (computer) :hidden
-   (let* [(boot-code-handle (fs/open (.> computer :spec :boot-file) "r"))
-          (boot-code (self boot-code-handle :readAll))
-          (coroutine (coroutine/create (load boot-code "ccjam-bios.lua" "t" (.> computer :env))))]
-     (self boot-code-handle :close)
-     (.<! computer :coroutine coroutine)
-     (when (> (n (.> computer :spec :startup-command)) 0)
-       (next! computer '("char" " "))
-       (for-each chr (string/split (.> computer :spec :startup-command) "")
-         (next! computer (list "char" chr)))
-       (next! computer '("key" 28)))))
+  (let* [(boot-code-handle (fs/open (shell/resolve (.> computer :spec :boot-file)) "r"))
+         (boot-code (progn (if boot-code-handle
+                             (self boot-code-handle :readAll)
+                             (error! "could not read boot file."))))
+         (coroutine (coroutine/create (load boot-code "ccjam-bios.lua" "t" (.> computer :env))))]
+    (self boot-code-handle :close)
+    (.<! computer :coroutine coroutine)
+    (when (> (n (.> computer :spec :startup-command)) 0)
+      (next! computer '("char" " "))
+      (for-each chr (string/split (.> computer :spec :startup-command) "")
+        (next! computer (list "char" chr)))
+      (next! computer '("key" 28)))))
 
 (define event-whitelist :hidden
         '( "timer" "alarm" "terminate" "http_success" "http_failure"
