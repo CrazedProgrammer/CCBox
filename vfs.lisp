@@ -45,11 +45,19 @@
               (if (or ((wrap-fun :isReadOnly) from-path)
                       ((wrap-fun :isReadOnly) to-path))
                 (error! "permission denied.")
-                '()))
+                (let* [((mount-from local-path-from) (mount-path mounts from-path))
+                       ((mount-to local-path-to) (mount-path mounts to-path))]
+                  (if (/= mount-from mount-to)
+                    (error! "copying across mounts is currently not implemented.")
+                    ((.> mount-from :move) local-path-from local-path-to)))))
       :copy (lambda (from-path to-path)
               (if ((wrap-fun :isReadOnly) to-path)
                 (error! "permission denied.")
-                '()))
+                (let* [((mount-from local-path-from) (mount-path mounts from-path))
+                       ((mount-to local-path-to) (mount-path mounts to-path))]
+                  (if (/= mount-from mount-to)
+                    (error! "copying across mounts is currently not implemented.")
+                    ((.> mount-from :copy) local-path-from local-path-to)))))
       :delete (wrap-fun :delete)
       :combine fs/combine
       :open (wrap-fun :open)
@@ -118,5 +126,9 @@
               (if read-only
                 (error! "permission denied.")
                 (fs/delete $"~{dir}/~{path}")))
+    :move (lambda (from to)
+              (fs/move $"~{dir}/~{from}" $"~{dir}/~{to}"))
+    :copy (lambda (from to)
+              (fs/copy $"~{dir}/~{from}" $"~{dir}/~{to}"))
     :open (lambda (path mode)
               (fs/open $"~{dir}/~{path}" mode)) })

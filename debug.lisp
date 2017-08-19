@@ -1,7 +1,7 @@
 (import bindings/os os)
 (import extra/io (append-all!))
 (define log-path "log.txt")
-(define logging-enabled true)
+(define logging-enabled false)
 
 (defun log! (message)
   (when logging-enabled

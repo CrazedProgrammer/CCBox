@@ -1,4 +1,5 @@
 # CCBox
+System virtualisation program for ComputerCraft.  
 My entry for CCJam 2017.  
 
 # Download
