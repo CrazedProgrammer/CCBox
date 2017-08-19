@@ -9,7 +9,7 @@ This program was made with and tested for the [ComputerCraft 1.80 Nightly](https
 # How to use
 Get a boot file ([bios.lua](https://github.com/dan200/ComputerCraft/blob/master/src/main/resources/assets/computercraft/lua/bios.lua)):  
 `wget https://raw.githubusercontent.com/dan200/ComputerCraft/master/src/main/resources/assets/computercraft/lua/bios.lua bios.lua`  
-And then simply run `ccjam`.  
+And then simply run `ccbox`.  
 You can exit a VM by running `shutdown`.  
 There are many different options available:  
   
