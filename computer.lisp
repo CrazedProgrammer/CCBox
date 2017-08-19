@@ -125,6 +125,6 @@
     (.<! global :rs (.> global :redstone))
     (when (! (.> computer :spec :disable-networking))
       (.<! global :http (when (.> _G :http) (merge (.> _G :http) {})))
-      (.<! global :socket (when (.> _G :http) (merge (.> _G :socket) {}))))
+      (.<! global :socket (when (.> _G :socket) (merge (.> _G :socket) {}))))
     (.<! global :fs (.> computer :vfs))
     global))
