@@ -62,10 +62,20 @@
 (defun canonicalise (path abs)
   (let* [(abs-path (string/trim (if abs path
                                         (shell/resolve path))))
-         (filtered-path (string/concat (filter (lambda (x)
-                                                 (and (/= x "") (/= x ".")))
-                                               (string/split abs-path "%/")) "/"))]
-    filtered-path))
+         (parts (string/split abs-path "%/"))
+         (i 1)]
+    (while (<= i (n parts))
+      (if (= (nth parts i) "..")
+        (progn
+          (remove-nth! parts i)
+          (when (= (n parts) 0)
+            (error! "invalid path."))
+          (dec! i)
+          (remove-nth! parts i))
+        (inc! i)))
+    (string/concat (filter (lambda (x)
+                             (and (/= x "") (/= x ".")))
+                           parts) "/")))
 
 (defun create-realfs (dir read-only)
   { :list (lambda (path)

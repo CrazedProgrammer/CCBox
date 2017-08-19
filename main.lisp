@@ -23,6 +23,12 @@
             :default "bios.lua"
             :narg 1)
 
+          (add-argument! spec '("--command" "-c")
+            :name "startup-command"
+            :help "The startup command."
+            :default ""
+            :narg 1)
+
           (add-argument! spec '("--disable-net")
             :name "disable-networking"
             :help "Disables networking (http, socket).")
@@ -44,6 +50,6 @@
 (defun run ()
   (with (comp (computer/create args))
     (while (.> comp :running)
-      (computer/next comp (list (os/pullEventRaw))))))
+      (computer/next! comp (list (os/pullEventRaw))))))
 
 (run)
