@@ -51,7 +51,7 @@
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"
-           "ipairs" "rawequal" "xpcall" "_CC_DEFAULT_SETTINGS" "unpack" "bitop" "os"
+           "ipairs" "rawequal" "xpcall" "_CC_DEFAULT_SETTINGS" "unpack" "bitop"
            "setmetatable" "rawset" "rawget" "table" "bit32"
            "_HOST" "bit" "assert" "error" "pcall"
            "tostring" "next" "tonumber" "math" "_RUNTIME" "coroutine"
@@ -103,13 +103,25 @@
                                     (list {} "getSides")
                                     (list 0 "getAnalogInput" "getAnalogOutput"
                                             "getBundledInput" "getBundledOutput")))))
+    (.<! global :os
+         { :getComputerID (lambda () (.> computer :id))
+           :getComputerLabel (lambda () (.> computer :label))
+           :setComputerLabel (lambda (label) (.<! computer :label label))
+           :queueEvent os/queueEvent
+           :clock os/clock
+           :startTimer os/startTimer
+           :cancelTimer os/cancelTimer
+           :time os/time
+           :day os/day
+           :setAlarm os/setAlarm
+           :cancelAlarm os/cancelAlarm
+           :shutdown (lambda () (.<! computer :running false))
+           :reboot (lambda ()
+                     (create-coroutine! computer)
+                     (os/sleep 0)) })
     (.<! global :rs (.> global :redstone))
     (when (! (.> computer :spec :disable-networking))
       (.<! global :http (when (.> _G :http) (merge (.> _G :http) {})))
       (.<! global :socket (when (.> _G :http) (merge (.> _G :socket) {}))))
-    (.<! global :os :shutdown (lambda () (.<! computer :running false)))
-    (.<! global :os :reboot (lambda ()
-                              (create-coroutine! computer)
-                              (os/sleep 0)))
     (.<! global :fs (.> computer :vfs))
     global))

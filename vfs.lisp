@@ -1,14 +1,23 @@
 (import bindings/fs fs)
 (import bindings/os os)
 (import bindings/shell shell)
-(import lua/basic (_ENV))
+(import lua/basic (_ENV set-idx!))
 
 (defun create-vfs (vfs-mounts)
   (let* [(mounts {})
          (wrap-fun (lambda (function)
                      (lambda (path &rest)
                        (with ((mount local-path) (mount-path mounts path))
-                         ((.> mount function) local-path (unpack rest))))))]
+                         ((.> mount function) local-path (unpack rest))))))
+         (dir-list (lambda (x)
+                     (let* [(path (canonicalise x true))
+                            (entries ((wrap-fun :list) path))]
+                       (for-each mount-path (keys mounts)
+                         (with (mount-path-parts (string/split mount-path "%/"))
+                           (when (and (= path (string/concat (init mount-path-parts) "/")) (/= mount-path "")
+                                      (! (elem? (last mount-path-parts) (values entries))))
+                             (set-idx! entries (+ (len# entries) 1) (last mount-path-parts)))))
+                       entries)))]
     (for-each vfs-mount vfs-mounts
       (let* [(mount-args (string/split vfs-mount "%:"))
              (attributes (string/split (car mount-args) ""))
@@ -23,7 +32,7 @@
           (.<! mounts mount-point (create-realfs dir read-only))
           (error! "unimplemented."))))
 
-    { :list (wrap-fun :list)
+    { :list dir-list
       :exists (wrap-fun :exists)
       :isDir (wrap-fun :isDir)
       :isReadOnly (wrap-fun :isReadOnly)
@@ -44,10 +53,20 @@
       :delete (wrap-fun :delete)
       :combine fs/combine
       :open (wrap-fun :open)
-      :find (lambda (wildcard) '())
+      :find (lambda (wildcard)
+              (if ((wrap-fun :exists) wildcard)
+                (list wildcard)
+                '()))
       :getDir fs/getDir
       :complete (lambda (partial-name path include-files include-slashes)
-                  '()) }))
+                  (if (! ((wrap-fun :isDir)))
+                    {}
+                    (with (names (dir-list path))
+                      (filter
+                        (lambda (x) (= x "nil"))
+                        (map (lambda (name)
+                               (if (= (string/sub name 1 (n partial-name)) partial-name)
+                                 name "nil"))))))) }))
 
 (defun mount-path (mounts path)
   (let* [(abs-path (canonicalise path true))
