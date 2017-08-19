@@ -1,13 +1,15 @@
 # CCBox
 System virtualisation program for ComputerCraft.  
 My entry for CCJam 2017.  
+This program was made with and tested for the [ComputerCraft 1.80 Nightly](https://cc.crzd.me/) builds.
 
 # Download
-[pastebin get PheuiSP1](https://pastebin.com/PheuiSP1)  
+[pastebin get PheuiSP1 ccbox.lua](https://pastebin.com/PheuiSP1)  
 
 # How to use
-Get a boot file ([bios.lua](https://github.com/dan200/ComputerCraft/blob/master/src/main/resources/assets/computercraft/lua/bios.lua)) and put it in your CC computer directory.  
-Then simply run `ccjam`.  
+Get a boot file ([bios.lua](https://github.com/dan200/ComputerCraft/blob/master/src/main/resources/assets/computercraft/lua/bios.lua)):  
+`wget https://raw.githubusercontent.com/dan200/ComputerCraft/master/src/main/resources/assets/computercraft/lua/bios.lua bios.lua`  
+And then simply run `ccjam`.  
 There are many different options available:  
 ![](https://img.crzd.me/ccbox.png)
 
