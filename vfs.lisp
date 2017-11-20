@@ -15,7 +15,7 @@
                        (for-each mount-path (keys mounts)
                          (with (mount-path-parts (string/split mount-path "%/"))
                            (when (and (= path (string/concat (init mount-path-parts) "/")) (/= mount-path "")
-                                      (! (elem? (last mount-path-parts) (values entries))))
+                                      (not (elem? (last mount-path-parts) (values entries))))
                              (set-idx! entries (+ (len# entries) 1) (last mount-path-parts)))))
                        entries)))]
     (for-each vfs-mount vfs-mounts
@@ -27,7 +27,7 @@
                         [(elem? "r" attributes) 'realfs ]
                         [(elem? "t" attributes) 'tmpfs ]
                         [true (error! "file system type not found.")]))
-             (read-only (! (elem? "w" attributes)))]
+             (read-only (not (elem? "w" attributes)))]
         (if (eq? fs-type 'realfs)
           (.<! mounts mount-point (create-realfs dir read-only))
           (error! "unimplemented."))))
@@ -67,7 +67,7 @@
                 '()))
       :getDir fs/getDir
       :complete (lambda (partial-name path include-files include-slashes)
-                  (if (! ((wrap-fun :isDir)))
+                  (if (not ((wrap-fun :isDir)))
                     {}
                     (with (names (dir-list path))
                       (filter

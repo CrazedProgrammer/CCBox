@@ -2,7 +2,7 @@
 (import vfs)
 (import bindings/os os)
 (import bindings/shell shell)
-(import extra/argparse ())
+(import io/argparse ())
 
 (define args
         (with (spec (create))
