@@ -8,7 +8,7 @@
          (wrap-fun (lambda (function)
                      (lambda (path &rest)
                        (with ((mount local-path) (mount-path mounts path))
-                         ((.> mount function) local-path (unpack rest))))))
+                         ((.> mount function) local-path (splice rest))))))
          (dir-list (lambda (x)
                      (let* [(path (canonicalise x true))
                             (entries ((wrap-fun :list) path))]
@@ -83,7 +83,7 @@
       (when (and (> (n mount-point) (n mount-name))
                     (= (string/sub abs-path 1 (n mount-point)) mount-point))
         (set! mount-name mount-point)))
-    (unpack (list (.> mounts mount-name)
+    (splice (list (.> mounts mount-name)
                   (canonicalise (string/sub abs-path (+ 1 (n mount-name))) true)))))
 
 (defun canonicalise (path abs)

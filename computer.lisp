@@ -45,12 +45,12 @@
 (defun next! (computer args)
   (let* [(event (car args))]
     (when (elem? event event-whitelist)
-      (with (result (list (coroutine/resume (.> computer :coroutine) event (unpack (cdr args)))))
+      (with (result (list (coroutine/resume (.> computer :coroutine) event (splice (cdr args)))))
         (if (= (car result) false)
           (error! (.. "computer panicked! error: \n" (cadr result)))
           (progn
             (debug/log! (.. "event: " (pretty args)))
-            (unpack (cdr result))))))))
+            (splice (cdr result))))))))
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"
