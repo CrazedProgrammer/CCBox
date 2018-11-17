@@ -11,7 +11,7 @@
 
 (defun create (spec)
   (let* [(cid 0)
-         (label $"computer-${cid}")
+         (label (format nil "computer-{#cid}"))
          (computer { :id cid
                      :label label
                      :running true
