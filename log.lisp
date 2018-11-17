@@ -1,10 +1,10 @@
 (import bindings/os os)
+(import bindings/shell shell)
 (import io (append-all!))
-(define log-path "log.txt")
-(define logging-enabled false)
+(import config (args))
 
 (defun log! (message)
-  (when logging-enabled
+  (when (/= (.> args :log-file) nil)
     (let* [(clock (os/clock))
            (time (.. (math/floor clock) "." (string/format "%02d" (* 100 (- clock (math/floor clock))))))]
-      (append-all! log-path (format nil "[{#time}] {#message}\n")))))
+      (append-all! (shell/resolve (.> args :log-file)) (format nil "[{#time}] {#message}\n")))))

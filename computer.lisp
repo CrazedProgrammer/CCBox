@@ -6,7 +6,7 @@
 (import bindings/term term)
 (import bindings/os os)
 (import bindings/shell shell)
-(import debug)
+(import log (log!))
 (import vfs (create-vfs))
 
 (defun create (spec)
@@ -49,7 +49,7 @@
         (if (= (car result) false)
           (error! (.. "computer panicked! error: \n" (cadr result)))
           (progn
-            (debug/log! (.. "event: " (pretty args)))
+            (log! (.. "event: " (pretty args)))
             (splice (cdr result))))))))
 
 (define env-whitelist :hidden

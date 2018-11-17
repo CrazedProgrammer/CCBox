@@ -20,6 +20,11 @@
             :default "bios.lua"
             :narg 1)
 
+          (add-argument! spec '("--log" "-l")
+            :name "log-file"
+            :help "         The log file."
+            :narg 1)
+
           (add-argument! spec '("--command" "-c")
             :name "startup-command"
             :help "     The startup command."
