@@ -1,7 +1,0 @@
-(define-native isPresent)
-(define-native getType)
-(define-native wrap)
-(define-native call)
-(define-native getMethods)
-(define-native find)
-(define-native getNames)

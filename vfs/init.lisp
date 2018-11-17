@@ -1,4 +1,3 @@
-(import bindings/shell shell)
 (import lua/basic (set-idx!))
 (import vfs/ccfs ccfs)
 

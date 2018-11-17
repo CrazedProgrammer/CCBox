@@ -1,12 +1,11 @@
 (import lua/basic (_G load getmetatable type#))
 (import lua/coroutine coroutine)
 (import core/base (set-idx!))
-(import bindings/window window)
-(import bindings/term term)
-(import bindings/os os)
-(import util (resolve-path read-file-force!))
+(import util (resolve-path read-file-force! get-time))
 (import log (log!))
 (import vfs (create-vfs))
+(import event (create-event-env))
+(import term (create-term))
 
 (defun create (spec)
   (let* [(cid 0)
@@ -15,6 +14,8 @@
                      :label label
                      :running true
                      :spec spec
+                     :event-env (create-event-env next!)
+                     :term (create-term)
                      :vfs (create-vfs (.> spec :vfs-mounts)) })
          (env (create-env computer))]
       ;; todo: fix this paradox
@@ -65,7 +66,6 @@
                                ["table" (merge contents {})]
                                [_ contents]))))
                      env-whitelist)))
-         (term (merge (term/current) {}))
          (const-fun-struct (lambda (xxs)
                              (assoc->struct
                                (flat-map (lambda (xs)
@@ -80,7 +80,7 @@
                (if (= (type# a) "string")
                  {}
                  (getmetatable a))))
-    (.<! global :term term )
+    (.<! global :term (.> computer :term))
     (.<! global :disk (if (.> spec :enable-disk)
                         (.> _G :disk)
                         (const-fun-struct
@@ -105,18 +105,20 @@
          { :getComputerID (lambda () (.> computer :id))
            :getComputerLabel (lambda () (.> computer :label))
            :setComputerLabel (lambda (label) (.<! computer :label label))
-           :queueEvent os/queueEvent
-           :clock os/clock
-           :startTimer os/startTimer
-           :cancelTimer os/cancelTimer
-           :time os/time
-           :day os/day
-           :setAlarm os/setAlarm
-           :cancelAlarm os/cancelAlarm
+           :queueEvent (.> computer :event-env :queueEvent)
+           :startTimer (.> computer :event-env :startTimer)
+           :cancelTimer (.> computer :event-env :cancelTimer)
+           :setAlarm (.> computer :event-env :setAlarm)
+           :cancelAlarm (.> computer :event-env :cancelAlarm)
+           :clock get-time
+           :time (lambda ()
+                   (mod (/ (get-time) 60) 24))
+           :day (lambda ()
+                  (math/floor (/ (get-time) 60 24)))
            :shutdown (lambda () (.<! computer :running false))
            :reboot (lambda ()
-                     (create-coroutine! computer)
-                     (os/sleep 0)) })
+                     ; todo: find a nice way to refresh the screen when rebooting
+                     (create-coroutine! computer) ) })
     (.<! global :rs (.> global :redstone))
     (when (not (.> computer :spec :disable-networking))
       (.<! global :http (when (.> _G :http) (merge (.> _G :http) {})))

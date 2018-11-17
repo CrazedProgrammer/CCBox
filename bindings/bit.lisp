@@ -1,7 +1,0 @@
-(define-native bxor)
-(define-native bor)
-(define-native blshift)
-(define-native blogic_rshift)
-(define-native brshift)
-(define-native band)
-(define-native bnot)
