@@ -1,11 +1,10 @@
 (import lua/basic (_G load getmetatable type#))
 (import lua/coroutine coroutine)
 (import core/base (set-idx!))
-(import bindings/fs fs)
 (import bindings/window window)
 (import bindings/term term)
 (import bindings/os os)
-(import bindings/shell shell)
+(import util (resolve-path read-file-force!))
 (import log (log!))
 (import vfs (create-vfs))
 
@@ -24,12 +23,8 @@
       computer))
 
 (defun create-coroutine! (computer) :hidden
-  (let* [(boot-code-handle (fs/open (shell/resolve (.> computer :spec :boot-file)) "r"))
-         (boot-code (progn (if boot-code-handle
-                             (self boot-code-handle :readAll)
-                             (error! "could not read boot file."))))
-         (coroutine (coroutine/create (load boot-code "ccjam-bios.lua" "t" (.> computer :env))))]
-    (self boot-code-handle :close)
+  (let* [(boot-code (read-file-force! (resolve-path (.> computer :spec :boot-file))))
+         (coroutine (coroutine/create (load boot-code "ccbox-bios.lua" "t" (.> computer :env))))]
     (.<! computer :coroutine coroutine)
     (when (> (n (.> computer :spec :startup-command)) 0)
       (next! computer '("char" " "))

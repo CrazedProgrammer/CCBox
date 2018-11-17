@@ -1,7 +1,6 @@
 (import computer)
 (import vfs)
 (import bindings/os os)
-(import bindings/shell shell)
 (import config (args))
 
 
