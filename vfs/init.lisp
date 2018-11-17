@@ -1,7 +1,6 @@
-(import bindings/fs fs)
-(import bindings/os os)
 (import bindings/shell shell)
-(import lua/basic (_ENV set-idx!))
+(import lua/basic (set-idx!))
+(import vfs/ccfs ccfs)
 
 (defun create-vfs (vfs-mounts)
   (let* [(mounts {})
@@ -10,7 +9,7 @@
                        (with ((mount local-path) (mount-path mounts path))
                          ((.> mount function) local-path (splice rest))))))
          (dir-list (lambda (x)
-                     (let* [(path (canonicalise x true))
+                     (let* [(path (canonicalise x))
                             (entries ((wrap-fun :list) path))]
                        (for-each mount-path (keys mounts)
                          (with (mount-path-parts (string/split mount-path "%/"))
@@ -21,7 +20,7 @@
     (for-each vfs-mount vfs-mounts
       (let* [(mount-args (string/split vfs-mount "%:"))
              (attributes (string/split (car mount-args) ""))
-             (mount-point (canonicalise (cadr mount-args) true))
+             (mount-point (canonicalise (cadr mount-args)))
              (dir (canonicalise (caddr mount-args) false))
              (fs-type (cond
                         [(elem? "r" attributes) 'realfs ]
@@ -29,14 +28,16 @@
                         [true (error! "file system type not found.")]))
              (read-only (not (elem? "w" attributes)))]
         (if (eq? fs-type 'realfs)
-          (.<! mounts mount-point (create-realfs dir read-only))
+          (.<! mounts mount-point (ccfs/create dir read-only))
           (error! "unimplemented."))))
 
     { :list dir-list
       :exists (wrap-fun :exists)
       :isDir (wrap-fun :isDir)
       :isReadOnly (wrap-fun :isReadOnly)
-      :getName fs/getName
+      :getName (lambda (path)
+                 (with (name (last (string/split (canonicalise path) "%/")))
+                   (if (= name "") "root" name)))
       :getDrive (lambda (path) "hdd")
       :getSize (wrap-fun :getSize)
       :getFreeSpace (wrap-fun :getFreeSpace)
@@ -59,13 +60,18 @@
                     (error! "copying across mounts is currently not implemented.")
                     ((.> mount-from :copy) local-path-from local-path-to)))))
       :delete (wrap-fun :delete)
-      :combine fs/combine
+      :combine (lambda (path child-path)
+                 (canonicalise (.. path "/" child-path)))
       :open (wrap-fun :open)
       :find (lambda (wildcard)
               (if ((wrap-fun :exists) wildcard)
                 (list wildcard)
                 '()))
-      :getDir fs/getDir
+      :getDir (lambda (path)
+                (with (parts (string/split (canonicalise path) "%/"))
+                  (cond [(= (car parts) "") ".."]
+                        [(= (n parts) 1) ""]
+                        [else (cadr (reverse parts))])))
       :complete (lambda (partial-name path include-files include-slashes)
                   (if (not ((wrap-fun :isDir)))
                     {}
@@ -77,19 +83,17 @@
                                  name "nil"))))))) }))
 
 (defun mount-path (mounts path)
-  (let* [(abs-path (canonicalise path true))
+  (let* [(abs-path (canonicalise path))
          (mount-name "")]
     (for-each mount-point (keys mounts)
       (when (and (> (n mount-point) (n mount-name))
                     (= (string/sub abs-path 1 (n mount-point)) mount-point))
         (set! mount-name mount-point)))
     (splice (list (.> mounts mount-name)
-                  (canonicalise (string/sub abs-path (+ 1 (n mount-name))) true)))))
+                  (canonicalise (string/sub abs-path (+ 1 (n mount-name))))))))
 
 (defun canonicalise (path abs)
-  (let* [(abs-path (string/trim (if abs path
-                                        (shell/resolve path))))
-         (parts (string/split abs-path "%/"))
+  (let* [(parts (string/split path "%/"))
          (i 1)]
     (while (<= i (n parts))
       (if (= (nth parts i) "..")
@@ -104,31 +108,3 @@
                              (and (/= x "") (/= x ".")))
                            parts) "/")))
 
-(defun create-realfs (dir read-only)
-  { :list (lambda (path)
-            (fs/list (format nil "{#dir}/{#path}")))
-    :exists (lambda (path)
-              (fs/exists (format nil "{#dir}/{#path}")))
-    :isDir (lambda (path)
-             (fs/isDir (format nil "{#dir}/{#path}")))
-    :isReadOnly (lambda (path)
-                  (or read-only
-                    (fs/isReadOnly (format nil "{#dir}/{#path}"))))
-    :getSize (lambda (path)
-               (fs/getSize (format nil "{#dir}/{#path}")))
-    :getFreeSpace (lambda (path)
-                    (fs/getFreeSpace (format nil "{#dir}/{#path}")))
-    :makeDir (lambda (path)
-               (if read-only
-                 (error! "permission denied.")
-                 (fs/makeDir (format nil "{#dir}/{#path}"))))
-    :delete (lambda (path)
-              (if read-only
-                (error! "permission denied.")
-                (fs/delete (format nil "{#dir}/{#path}"))))
-    :move (lambda (from to)
-              (fs/move (format nil "{#dir}/{#from}") (format nil "{#dir}/{#to}")))
-    :copy (lambda (from to)
-              (fs/copy (format nil "{#dir}/{#from}") (format nil "{#dir}/{#to}")))
-    :open (lambda (path mode)
-              (fs/open (format nil "{#dir}/{#path}") mode)) })
