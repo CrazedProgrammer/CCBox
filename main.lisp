@@ -1,5 +1,4 @@
 (import computer)
-(import vfs)
 (import config (args))
 
 
