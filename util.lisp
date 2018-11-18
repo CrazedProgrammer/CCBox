@@ -1,6 +1,13 @@
 (import lua/basic (_ENV _G))
 (import lua/os os)
+(import config (args))
 (import io)
+
+(defun log! (message)
+  (when (.> args :log-file)
+    (let* [(clock (get-time))
+           (time (.. (math/floor clock) "." (string/format "%02d" (* 100 (- clock (math/floor clock))))))]
+      (io/append-all! (resolve-path (.> args :log-file)) (format nil "[{#time}] {#message}\n")))))
 
 (defun resolve-path (path)
   (if (and (.> _ENV :shell) (.> _ENV :shell :resolve))

@@ -1,11 +1,9 @@
 (import lua/basic (_G load getmetatable type#))
 (import lua/coroutine coroutine)
 (import core/base (set-idx!))
-(import util (resolve-path read-file-force! get-time))
-(import log (log!))
+(import util (log! resolve-path read-file-force! get-time))
 (import vfs (create-vfs))
-(import event (create-event-env))
-(import term (create-term))
+(import platforms (create-event-env create-term))
 
 (defun create (spec)
   (let* [(cid 0)
@@ -33,20 +31,15 @@
         (next! computer (list "char" chr)))
       (next! computer '("key" 28)))))
 
-(define event-whitelist :hidden
-        '( "timer" "alarm" "terminate" "http_success" "http_failure"
-           "paste" "char" "key" "key_up"
-           "mouse_click" "mouse_up" "mouse_scroll" "mouse_drag" ))
 
 (defun next! (computer args)
   (let* [(event (car args))]
-    (when (elem? event event-whitelist)
-      (with (result (list (coroutine/resume (.> computer :coroutine) event (splice (cdr args)))))
-        (if (= (car result) false)
-          (error! (.. "computer panicked! error: \n" (cadr result)))
-          (progn
-            (log! (.. "event: " (pretty args)))
-            (splice (cdr result))))))))
+    (with (result (list (coroutine/resume (.> computer :coroutine) event (splice (cdr args)))))
+      (if (= (car result) false)
+        (error! (.. "computer panicked! error: \n" (cadr result)))
+        (progn
+          (log! (.. "event: " (pretty args)))
+          (splice (cdr result)))))))
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"
