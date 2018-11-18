@@ -39,7 +39,7 @@
         (error! (.. "computer panicked! error: \n" (cadr result)))
         (progn
           (log! (.. "event: " (pretty args)))
-          (splice (cdr result)))))))
+          (cadr result))))))
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"

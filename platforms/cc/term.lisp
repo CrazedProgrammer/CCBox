@@ -2,4 +2,4 @@
 (define term (.> _G :term))
 
 (defun create ()
-  (merge ((.> term :current)) {}))
+  ((.> term :current)))
