@@ -1,11 +1,11 @@
 (import config (args))
 (import util (is-computercraft?))
-(import platforms/cc/event cc/event)
+(import platforms/cc/runtime cc/runtime)
 (import platforms/cc/term cc/term)
 
-(defun create-event-env (next-fn!)
-  (cond [(is-computercraft?) (cc/event/create next-fn!)]
-        [else (error! "suitable event system not found")]))
+(defun start-runtime! (computer next!)
+  (cond [(is-computercraft?) (cc/runtime/start! computer next!)]
+        [else (error! "suitable runtime not found")]))
 
 (defun create-term ()
   (with (term (cond [(is-computercraft?) (cc/term/create)]

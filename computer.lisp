@@ -3,7 +3,7 @@
 (import core/base (set-idx!))
 (import util (log! resolve-path read-file-force! get-time))
 (import vfs (create-vfs))
-(import platforms (create-event-env create-term))
+(import platforms (create-term))
 
 (defun create (spec)
   (let* [(cid 0)
@@ -12,7 +12,6 @@
                      :label label
                      :running true
                      :spec spec
-                     :event-env (create-event-env next!)
                      :term (create-term)
                      :vfs (create-vfs (.> spec :vfs-mounts)) })
          (env (create-env computer))]
@@ -98,11 +97,12 @@
          { :getComputerID (lambda () (.> computer :id))
            :getComputerLabel (lambda () (.> computer :label))
            :setComputerLabel (lambda (label) (.<! computer :label label))
-           :queueEvent (.> computer :event-env :queueEvent)
-           :startTimer (.> computer :event-env :startTimer)
-           :cancelTimer (.> computer :event-env :cancelTimer)
-           :setAlarm (.> computer :event-env :setAlarm)
-           :cancelAlarm (.> computer :event-env :cancelAlarm)
+           ; todo: create event system
+           :queueEvent (.> _G :os :queueEvent)
+           :startTimer (.> _G :os :startTimer)
+           :cancelTimer (.> _G :os :cancelTimer)
+           :setAlarm (.> _G :os :setAlarm)
+           :cancelAlarm (.> _G :os :cancelAlarm)
            :clock get-time
            :time (lambda ()
                    (mod (/ (get-time) 60) 24))
