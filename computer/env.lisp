@@ -1,3 +1,6 @@
+(import lua/basic (type# _G))
+(import util (get-time))
+
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"
            "ipairs" "rawequal" "xpcall" "_CC_DEFAULT_SETTINGS" "unpack" "bitop"
@@ -33,7 +36,7 @@
           (list 0 "getAnalogInput" "getAnalogOutput"
                   "getBundledInput" "getBundledOutput"))))
 
-(defun create-env (computer) :hidden
+(defun create-env (computer)
   (let* [(spec (.> computer :spec))
          (global (assoc->struct
                    (map (lambda (name)
@@ -50,6 +53,9 @@
                  {}
                  (getmetatable a))))
     (.<! global :term (.> computer :term))
+    (.<! global :disk nil-disk)
+    (.<! global :peripheral nil-peripheral)
+    (.<! global :redstone nil-redstone)
     (.<! global :os
          { :getComputerID (lambda () (.> computer :id))
            :getComputerLabel (lambda () (.> computer :label))
@@ -68,7 +74,9 @@
            :shutdown (lambda () (.<! computer :running false))
            :reboot (lambda ()
                      ; todo: find a nice way to refresh the screen when rebooting
-                     (create-coroutine! computer) ) })
+                     ; todo: find a nice way of refreshing
+                     ; (create-coroutine! computer)
+                     ) })
     (.<! global :rs (.> global :redstone))
     (when (not (.> computer :spec :disable-networking))
       (.<! global :http (when (.> _G :http) (merge (.> _G :http) {})))

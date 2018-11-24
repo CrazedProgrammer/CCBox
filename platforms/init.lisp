@@ -3,8 +3,8 @@
 (import platforms/cc/runtime cc/runtime)
 (import platforms/cc/term cc/term)
 
-(defun start-runtime! (computer next!)
-  (cond [(is-computercraft?) (cc/runtime/start! computer next!)]
+(defun start-runtime! (computer)
+  (cond [(is-computercraft?) (cc/runtime/start! computer)]
         [else (error! "suitable runtime not found")]))
 
 (defun create-term ()
