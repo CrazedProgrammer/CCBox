@@ -5,7 +5,7 @@
 
 (defun log! (message)
   (when (.> args :log-file)
-    (let* [(clock (get-time))
+    (let* [(clock (get-time!))
            (time (.. (math/floor clock) "." (string/format "%02d" (* 100 (- clock (math/floor clock))))))]
       (io/append-all! (resolve-path (.> args :log-file)) (format nil "[{#time}] {#message}\n")))))
 
@@ -36,13 +36,13 @@
       (error! (format nil "could not read file \"{#path}\"")))))
 
 
-(defun get-time-raw () :hidden
+(defun get-time-raw! () :hidden
   (if (is-computercraft?)
     (os/clock)
     (os/time)))
 
 (define startup-time :hidden
-  (get-time-raw))
+  (get-time-raw!))
 
-(defun get-time ()
-  (- (get-time-raw) startup-time))
+(defun get-time! ()
+  (- (get-time-raw!) startup-time))

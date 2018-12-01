@@ -1,12 +1,22 @@
-(import computer/coroutine (resume!))
-(import lua/coroutine coroutine)
+(import computer/event event)
+(import lua/basic (_G))
+(import util (log!))
+
+(define pull-event-raw! (.> _G :os :pullEventRaw))
+(define start-timer! (.> _G :os :startTimer))
 (define event-whitelist :hidden
-        '( "timer" "alarm" "terminate" "http_success" "http_failure"
+        '( "terminate" "http_success" "http_failure"
            "paste" "char" "key" "key_up"
            "mouse_click" "mouse_up" "mouse_scroll" "mouse_drag" ))
 
 (defun start! (computer)
-  (while (.> computer :running)
-    (with (event-args (list (coroutine/yield)))
-      (when (elem? (car event-args) event-whitelist)
-        (resume! computer event-args)))))
+  (with (tick-timer (start-timer! 0.05))
+    (while (.> computer :running)
+      (with (event-args (list (pull-event-raw!)))
+        (if (elem? (car event-args) event-whitelist)
+          (progn
+            (event/queue! computer event-args)
+            (event/tick! computer))
+          (when (and (= (car event-args) "timer") (= (cadr event-args) tick-timer))
+            (event/tick! computer)
+            (set! tick-timer (start-timer! 0.05))))))))

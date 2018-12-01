@@ -1,5 +1,6 @@
 (import lua/basic (type# _G))
-(import util (get-time))
+(import computer/coroutine (create-coroutine))
+(import util (get-time!))
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"
@@ -61,22 +62,20 @@
            :getComputerLabel (lambda () (.> computer :label))
            :setComputerLabel (lambda (label) (.<! computer :label label))
            ; todo: create event system
-           :queueEvent (.> _G :os :queueEvent)
-           :startTimer (.> _G :os :startTimer)
-           :cancelTimer (.> _G :os :cancelTimer)
-           :setAlarm (.> _G :os :setAlarm)
-           :cancelAlarm (.> _G :os :cancelAlarm)
-           :clock get-time
+           :queueEvent (.> computer :event-env :api :queueEvent)
+           :startTimer (.> computer :event-env :api :startTimer)
+           :cancelTimer (.> computer :event-env :api :cancelTimer)
+           :setAlarm (.> computer :event-env :api :setAlarm)
+           :cancelAlarm (.> computer :event-env :api :cancelAlarm)
+           :clock get-time!
            :time (lambda ()
-                   (mod (/ (get-time) 60) 24))
+                   (mod (/ (get-time!) 60) 24))
            :day (lambda ()
-                  (math/floor (/ (get-time) 60 24)))
+                  (math/floor (/ (get-time!) 60 24)))
            :shutdown (lambda () (.<! computer :running false))
            :reboot (lambda ()
                      ; todo: find a nice way to refresh the screen when rebooting
-                     ; todo: find a nice way of refreshing
-                     ; (create-coroutine! computer)
-                     ) })
+                     (.<! computer :coroutine (create-coroutine computer))) })
     (.<! global :rs (.> global :redstone))
     (when (not (.> computer :spec :disable-networking))
       (.<! global :http (when (.> _G :http) (merge (.> _G :http) {})))
