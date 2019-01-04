@@ -1,5 +1,6 @@
 (import lua/basic (set-idx!))
 (import vfs/ccfs ccfs)
+(import vfs/tmpfs tmpfs)
 
 (defun create-vfs (vfs-mounts)
   (let* [(mounts {})
@@ -26,9 +27,10 @@
                         [(elem? "t" attributes) 'tmpfs ]
                         [true (error! "file system type not found.")]))
              (read-only (not (elem? "w" attributes)))]
-        (if (eq? fs-type 'realfs)
-          (.<! mounts mount-point (ccfs/create dir read-only))
-          (error! "unimplemented."))))
+        (case fs-type
+          [realfs (.<! mounts mount-point (ccfs/create dir read-only))]
+          [tmpfs (.<! mounts mount-point (tmpfs/create dir))]
+          [else (error! "unimplemented.")])))
 
     { :list dir-list
       :exists (wrap-fun :exists)
