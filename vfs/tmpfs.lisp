@@ -2,14 +2,13 @@
 (import util (log!))
 
 (defun access-tree! (inode path contents) :hidden
-  (log! (.. "path: " path))
   (if (= path "")
     inode
     (let* [(path-parts (string/split path "%/"))
            (child-inode (.> inode (car path-parts)))]
       (if (> (n path-parts) 1)
         (if (= (type# child-inode) "table")
-          (access-tree! inode (string/concat (cdr path-parts) "/") contents)
+          (access-tree! child-inode (string/concat (cdr path-parts) "/") contents)
           (error! "No such file or directory"))
         (if (/= (type# contents) "nil")
           (.<! inode (car path-parts) (or contents nil))
@@ -113,8 +112,7 @@
       :getSize (const 0)
       :getFreeSpace (const 1000000000)
       :makeDir (lambda (path)
-                 (access-tree! fs-tree path {})
-                 (log! (.. "tree: " (pretty fs-tree))))
+                 (access-tree! fs-tree path {}))
       :move (const nil)
       :copy (const nil)
       :delete (lambda (path) (access-tree! fs-tree path false))
