@@ -12,7 +12,7 @@
                      dir: host file system directory
                      Can be relative to the current directory.
                      Default: rw:/:. r:/rom:/rom"
-            :default '("rw:/:." "r:/rom:/rom"))
+            :default '("cw:/:." "c:/rom:/rom"))
 
           (add-argument! spec '("--boot" "-b")
             :name "boot-file"
