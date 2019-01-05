@@ -11,7 +11,7 @@
                      mount: mount point (has to start with /)
                      dir: host file system directory
                      Can be relative to the current directory.
-                     Default: rw:/:. r:/rom:/rom"
+                     Default: cw:/:. c:/rom:/rom"
             :default '("cw:/:." "c:/rom:/rom"))
 
           (add-argument! spec '("--boot" "-b")
