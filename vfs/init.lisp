@@ -119,23 +119,25 @@
          (lambda (raw-from-path raw-to-path)
            (let* [(from-path (canonicalise raw-from-path))
                   (to-path (canonicalise raw-to-path))]
-             (if (not ((.> vfs :exists) from-path))
-               (error! "No such file")
-               (if ((.> vfs :exists) to-path)
-                 (error! "File exists")
-                 (letrec [(copy-path (lambda (from to)
-                                       (log! (.. "copying " from " to " to))
-                                       (if ((.> vfs :isDir) from)
-                                         (progn
-                                           ((.> vfs :makeDir) to)
-                                           (do [(path (struct->list ((.> vfs :list) from)))]
-                                             (copy-path (.. from "/" path) (.. to "/" path))))
-                                         (let* [(read-handle ((.> vfs :open) from "r"))
-                                                (write-handle ((.> vfs :open) to "w"))]
-                                           ((.> write-handle :write) ((.> read-handle :readAll)))
-                                           ((.> read-handle :close))
-                                           ((.> write-handle :close))))))]
-                   (copy-path from-path to-path)))))))
+             (if ((.> vfs :isReadOnly) to-path)
+               (error! "Permission denied")
+               (if (not ((.> vfs :exists) from-path))
+                 (error! "No such file")
+                 (if ((.> vfs :exists) to-path)
+                   (error! "File exists")
+                   (letrec [(copy-path (lambda (from to)
+                                         (log! (.. "copying " from " to " to))
+                                         (if ((.> vfs :isDir) from)
+                                           (progn
+                                             ((.> vfs :makeDir) to)
+                                             (do [(path (struct->list ((.> vfs :list) from)))]
+                                               (copy-path (.. from "/" path) (.. to "/" path))))
+                                           (let* [(read-handle ((.> vfs :open) from "r"))
+                                                  (write-handle ((.> vfs :open) to "w"))]
+                                             ((.> write-handle :write) ((.> read-handle :readAll)))
+                                             ((.> read-handle :close))
+                                             ((.> write-handle :close))))))]
+                     (copy-path from-path to-path))))))))
 
     (.<! vfs :move (lambda (from-path to-path)
                      ((.> vfs :copy) from-path to-path)
