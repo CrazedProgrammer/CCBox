@@ -30,8 +30,8 @@
                              (and (/= x "") (/= x ".")))
                            parts) "/")))
 
-(defun mount-fs (vfs mounts new-vfs-mount)
-  (let* [(mount-args (string/split new-vfs-mount "%:"))
+(defun mount-fs (vfs mounts mount-str)
+  (let* [(mount-args (string/split mount-str "%:"))
          (attributes-str (car mount-args))
          (attributes (string/split attributes-str ""))
          (mount-point (canonicalise (cadr mount-args)))
@@ -40,23 +40,32 @@
                     [(elem? "c" attributes) 'ccfs ]
                     [(elem? "t" attributes) 'tmpfs ]
                     [true (error! (.. "Supported file system type not found in " attributes-str))]))
-         (read-only (not (elem? "w" attributes)))]
+         (read-only (not (elem? "w" attributes)))
+         (mount { :mount-str mount-str
+                  :readOnly read-only })]
     (if (not (all (lambda (a) (elem? a (list "w" "c" "t")))
                   attributes))
       (error! (.. "Unsupported mount option in " attributes-str))
       (if (and (/= mount-point "") (not ((.> vfs :isDir) mount-point)))
         (error! (.. "Cannot mount /" mount-point ": directory does not exist in the parent filesystem"))
-        (case fs-type
-          [ccfs (.<! mounts mount-point
-                     { :fs (ccfs/create dir)
-                       :readOnly read-only })]
-          [tmpfs (.<! mounts mount-point
-                      { :fs (tmpfs/create dir)
-                        :readOnly read-only })]
-          [else (error! "unimplemented.")])))))
+        (progn
+          (case fs-type
+            [ccfs (.<! mount :fs (ccfs/create dir))]
+            [tmpfs (.<! mount :fs (tmpfs/create dir))]
+            [else (error! "No file system type specified")])
+          (.<! mounts mount-point mount))))))
 
+(defun umount-fs (mounts raw-mount-point)
+  (let* [(mount-point (canonicalise raw-mount-point))
+         (mount (.> mounts mount-point))]
+    (if mount
+      (progn
+        (when (.> mount :close)
+          ((.> mount :close)))
+        (.<! mounts mount-point nil))
+      (error! (.. "Mount point /" mount-point " does not exist")))))
 
-(defun create-vfs (vfs-mounts)
+(defun create-vfs (mount-strs enable-runtime-mount)
   (let* [(mounts {})
          (wrap-fun (lambda (function)
                      (lambda (path &rest)
@@ -143,8 +152,18 @@
                      ((.> vfs :copy) from-path to-path)
                      ((.> vfs :delete) from-path)))
 
-    (for-each vfs-mount vfs-mounts
-      (mount-fs vfs mounts vfs-mount))
+    (for-each mount-str mount-strs
+      (mount-fs vfs mounts mount-str))
+
+    (when enable-runtime-mount
+      (.<! vfs :mount (lambda (mount-point)
+                        (mount-fs vfs mounts mount-point)))
+      (.<! vfs :umount (lambda (mount-point)
+                         (umount-fs mounts mount-point)))
+      (.<! vfs :listMounts (lambda ()
+                             (assoc->struct (map (lambda (mount-point)
+                                                   (list (.. "/" mount-point) (.> mounts mount-point :mount-str)))
+                                            (keys mounts))))))
 
     vfs))
 

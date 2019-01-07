@@ -13,7 +13,7 @@
                      :spec spec
                      :event-env (create-event-env)
                      :term (create-term)
-                     :vfs (create-vfs (.> spec :vfs-mounts)) })]
+                     :vfs (create-vfs (.> spec :vfs-mounts) (.> spec :enable-runtime-mount)) })]
       (.<! computer :env (create-env computer))
       (.<! computer :coroutine (create-coroutine computer))
       computer))

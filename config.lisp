@@ -47,6 +47,10 @@
             :name "enable-disk"
             :help "Enables disk drive passthrough.")
 
+          (add-argument! spec '("--enable-runtime-mount" "-m")
+            :name "enable-runtime-mount"
+            :help "Enables runtime mounting/unmounting of filesystems.")
+
           (add-argument! spec '("--non-advanced")
             :name "non-advanced"
             :help "Run as a standard (non-advanced) computer.")
