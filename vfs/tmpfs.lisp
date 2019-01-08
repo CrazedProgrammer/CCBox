@@ -1,5 +1,6 @@
 (import lua/basic (type#))
-(import util (log!))
+(import util (log! read-file-force! resolve-path json))
+(import io (write-all!))
 
 (defun access-tree! (inode path contents) :hidden
   (if (= path "")
@@ -95,7 +96,9 @@
 
 
 (defun create (file)
-  (let* [(fs-tree {})]
+  (let* [(fs-tree (if (/= file "")
+                    ((.> json :decode) (read-file-force! (resolve-path file)))
+                    {}))]
     { :list (lambda (path)
               (with (inode (access-tree! fs-tree path))
                 (if (= (type# inode) "table")
@@ -113,9 +116,9 @@
       :getFreeSpace (const 1000000000)
       :makeDir (lambda (path)
                  (access-tree! fs-tree path {}))
-      :move (const nil)
-      :copy (const nil)
       :delete (lambda (path) (access-tree! fs-tree path false))
-      :open (cut open-file! fs-tree <> <>) }))
-
+      :open (cut open-file! fs-tree <> <>)
+      :close (lambda ()
+               (when (/= file "")
+                 (write-all! (resolve-path file) ((.> json :encode) fs-tree)))) }))
 

@@ -6,7 +6,7 @@
           (add-argument! spec '("vfs-mounts")
             :help "The virtual file system mounts.
                      `<attrs>:<mount>:[dir]`
-                     attr: attributes. w (write), t (tempfs), r (realfs)
+                     attr: attributes. w (write), t (tmpfs), c (ccfs)
                      Temp doesn't require a dir argument.
                      mount: mount point (has to start with /)
                      dir: host file system directory
@@ -54,5 +54,10 @@
           (add-argument! spec '("--non-advanced")
             :name "non-advanced"
             :help "Run as a standard (non-advanced) computer.")
+
+          (add-argument! spec '("--json")
+            :name "json-file"
+            :help "Path to a JSON library (needs to have .encode and .decode functions). Only needed when loading/saving tmpfs filesystems."
+            :narg 1)
 
           (parse! spec)))

@@ -60,8 +60,8 @@
          (mount (.> mounts mount-point))]
     (if mount
       (progn
-        (when (.> mount :close)
-          ((.> mount :close)))
+        (when (.> mount :fs :close)
+          ((.> mount :fs :close)))
         (.<! mounts mount-point nil))
       (error! (.. "Mount point /" mount-point " does not exist")))))
 
