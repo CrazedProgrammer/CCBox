@@ -165,5 +165,9 @@
                                                    (list (.. "/" mount-point) (.> mounts mount-point :mount-str)))
                                             (keys mounts))))))
 
+    (.<! vfs :closeAll (lambda ()
+                         (do [(mount-point (reverse (keys mounts)))]
+                           (umount-fs mounts mount-point))))
+
     vfs))
 
