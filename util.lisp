@@ -3,6 +3,8 @@
 (import config (args))
 (import io)
 
+(define version "0.2.0-pre")
+
 (defun log! (message)
   (when (.> args :log-file)
     (let* [(clock (get-time!))
@@ -14,9 +16,10 @@
     ((.> _ENV :shell :resolve) path)
     path))
 
-(defun is-computercraft? ()
-  (or (.> _G :_CC_VERSION)
-      (.> _G :_HOST)))
+(defun get-platform ()
+  (cond
+    [(or (.> _G :_CC_VERSION) (.> _G :_HOST)) 'cc]
+    [else 'puc]))
 
 (defun read-file-force! (path)
   (with (result (io/read-all! path))
@@ -26,9 +29,9 @@
 
 
 (defun get-time-raw! () :hidden
-  (if (is-computercraft?)
-    (os/clock)
-    (os/time)))
+  (case (get-platform)
+    [cc (os/clock)]
+    [puc (os/time)]))
 
 (define startup-time :hidden
   (get-time-raw!))

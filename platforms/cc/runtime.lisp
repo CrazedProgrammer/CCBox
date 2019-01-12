@@ -2,8 +2,8 @@
 (import lua/basic (_G))
 (import util (log!))
 
-(define pull-event-raw! (.> _G :os :pullEventRaw))
-(define start-timer! (.> _G :os :startTimer))
+(define pull-event-raw! :hidden (.> _G :os :pullEventRaw))
+(define start-timer! :hidden (.> _G :os :startTimer))
 (define event-whitelist :hidden
         '( "terminate" "http_success" "http_failure"
            "paste" "char" "key" "key_up"

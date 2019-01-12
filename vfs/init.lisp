@@ -35,7 +35,7 @@
          (attributes-str (car mount-args))
          (attributes (string/split attributes-str ""))
          (mount-point (canonicalise (cadr mount-args)))
-         (dir (canonicalise (caddr mount-args)))
+         (dir (caddr mount-args))
          (fs-type (cond
                     [(elem? "c" attributes) 'ccfs ]
                     [(elem? "t" attributes) 'tmpfs ]
@@ -76,7 +76,8 @@
                                              (list fun-name (wrap-fun fun-name)))
                                            wrapped-funs-names)))
          (vfs {})]
-    (.<! vfs :list (.> wrapped-funs :list))
+    (.<! vfs :list (lambda (path)
+                     (list->struct (sort (struct->list ((.> wrapped-funs :list) path))))))
     (.<! vfs :exists (.> wrapped-funs :exists))
     (.<! vfs :isDir (.> wrapped-funs :isDir))
              ; TODO: make the VFS prevent writing to read-only mounts.

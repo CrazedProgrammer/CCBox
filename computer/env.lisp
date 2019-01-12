@@ -1,6 +1,6 @@
 (import lua/basic (type# _G))
 (import computer/coroutine (create-coroutine))
-(import util (get-time!))
+(import util (get-time! version))
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"
@@ -47,6 +47,7 @@
                                ["table" (merge contents {})]
                                [_ contents]))))
                      env-whitelist)))]
+    (.<! global :_HOST (.. "ComputerCraft 1.80pr1.12 (CCBox " version ")"))
     (.<! global :_G global)
     (.<! global :getmetatable
              (lambda (a)
@@ -61,7 +62,6 @@
          { :getComputerID (lambda () (.> computer :id))
            :getComputerLabel (lambda () (.> computer :label))
            :setComputerLabel (lambda (label) (.<! computer :label label))
-           ;; TODO: create event system
            :queueEvent (.> computer :event-env :api :queueEvent)
            :startTimer (.> computer :event-env :api :startTimer)
            :cancelTimer (.> computer :event-env :api :cancelTimer)
