@@ -13,12 +13,11 @@
            :cancelTimer (lambda (timer-id)
                           (cancel-timer! event-env timer-id))
            :setAlarm (lambda (game-time)
+                       ;;(set-alarm! event-env game-time))
                        (error! "alarms are currently not supported"))
-                       ;(set-alarm! event-env game-time))
            :cancelAlarm (lambda (timer-id)
-                          (error! "alarms are currently not supported"))
-                          ;(cancel-timer! event-env timer-id))
-                          } )
+                          ;;(cancel-timer! event-env timer-id))
+                          (error! "alarms are currently not supported")) } )
     event-env))
 
 (defun queue-event! (event-env event) :hidden
@@ -33,7 +32,7 @@
     timer-id))
 
 (defun set-alarm! (event-env timeout) :hidden
-  ; todo
+  ;; TODO
   )
 
 (defun cancel-timer! (event-env timer-id) :hidden
@@ -46,7 +45,7 @@
   (queue-event! (.> computer :event-env) event))
 
 (defun tick! (computer)
-  (let* [(event-env (.> computer :event-env)) ; todo: find a more pure way of doing this
+  (let* [(event-env (.> computer :event-env)) ; TODO: find a more pure way of doing this
          (queued-events (.> event-env :queued-events))
          (current-time (get-time!))
          (has-passed? (lambda (timer)

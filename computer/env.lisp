@@ -61,7 +61,7 @@
          { :getComputerID (lambda () (.> computer :id))
            :getComputerLabel (lambda () (.> computer :label))
            :setComputerLabel (lambda (label) (.<! computer :label label))
-           ; todo: create event system
+           ;; TODO: create event system
            :queueEvent (.> computer :event-env :api :queueEvent)
            :startTimer (.> computer :event-env :api :startTimer)
            :cancelTimer (.> computer :event-env :api :cancelTimer)
@@ -74,7 +74,7 @@
                   (math/floor (/ (get-time!) 60 24)))
            :shutdown (lambda () (.<! computer :running false))
            :reboot (lambda ()
-                     ; todo: find a nice way to refresh the screen when rebooting
+                     ;; TODO: find a nice way to refresh the screen when rebooting
                      (.<! computer :coroutine (create-coroutine computer))) })
     (.<! global :rs (.> global :redstone))
     (when (not (.> computer :spec :disable-networking))
