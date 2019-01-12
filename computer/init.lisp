@@ -1,5 +1,6 @@
 (import vfs (create-vfs))
-(import platforms (create-term))
+(import term (create-term))
+(import platforms (create-native-term))
 (import computer/env (create-env))
 (import computer/event (create-event-env))
 (import computer/coroutine (create-coroutine))
@@ -12,7 +13,7 @@
                      :running true
                      :spec spec
                      :event-env (create-event-env)
-                     :term (create-term)
+                     :term (create-term (create-native-term) true)
                      :vfs (create-vfs (.> spec :vfs-mounts) (.> spec :enable-runtime-mount)) })]
       (.<! computer :env (create-env computer))
       (.<! computer :coroutine (create-coroutine computer))

@@ -7,7 +7,7 @@
   (cond [(is-computercraft?) (cc/runtime/start! computer)]
         [else (error! "suitable runtime not found")]))
 
-(defun create-term ()
+(defun create-native-term ()
   (with (term (cond [(is-computercraft?) (cc/term/create)]
                     [else (error! "suitable terminal not found")]))
     ; TODO: write a layer around this so that black and white terminals cannot display colour

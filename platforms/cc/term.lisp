@@ -1,5 +1,11 @@
 (import lua/basic (_G))
-(define term (.> _G :term))
 
 (defun create ()
-  ((.> term :current)))
+  (with (term ((.> _G :term :current)))
+    { :getSize (.> term :getSize)
+      :setCursorPos (.> term :setCursorPos)
+      :setCursorBlink (.> term :setCursorBlink)
+      :blit (.> term :blit)
+      :scroll (.> term :scroll) }))
+      ;:getPaletteColour (.> term :getPaletteColour)
+      ;:setPaletteColour (.> term :setPaletteColour)

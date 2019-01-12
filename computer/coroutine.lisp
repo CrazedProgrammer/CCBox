@@ -17,7 +17,9 @@
   (let* [(event (car args))]
     (with (result (list (coroutine/resume (.> computer :coroutine) event (splice (cdr args)))))
       (if (= (car result) false)
-        (error! (.. "computer panicked! error: \n" (cadr result)))
+        (progn
+          (log! (.. "computer panicked! error: \n" (tostring (cadr result))))
+          (error! (.. "computer panicked! error: \n" (tostring (cadr result)))))
         (progn
           (log! (.. "event: " (pretty args)))
           ;; TODO: verify if this is the correct place to put this in

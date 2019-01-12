@@ -1,4 +1,4 @@
-(import lua/basic (_ENV _G dofile))
+(import lua/basic (_ENV _G dofile type#))
 (import lua/os os)
 (import config (args))
 (import io)
@@ -39,3 +39,8 @@
 (define json
   (when (.> args :json-file)
     (dofile (resolve-path (.> args :json-file)))))
+
+(defun demand-type! (val typename)
+  (when (/= (type# val) typename)
+    (log!(.. "Invalid type: expected " typename " but got " (type# val))))
+  (demand (= (type# val) typename) (.. "Invalid type: expected " typename " but got " (type# val))))
