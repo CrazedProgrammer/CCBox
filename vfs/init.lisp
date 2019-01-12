@@ -95,7 +95,7 @@
                           (error! "Permission denied")
                           ((.> wrapped-funs :makeDir) path))))
     (.<! vfs :delete (lambda (path)
-                        (if ((.> vfs :delete) path)
+                        (if ((.> vfs :isReadOnly) path)
                           (error! "Permission denied")
                           ((.> wrapped-funs :delete) path))))
     (.<! vfs :combine (lambda (path child-path)
