@@ -1,9 +1,9 @@
 (import vfs (create-vfs))
-(import term (create-term))
 (import platforms (create-native-term))
 (import computer/env (create-env))
 (import computer/event event)
 (import computer/coroutine (create-coroutine))
+(import computer/term (create-term))
 
 (defun create (spec)
   (let* [(cid 0)

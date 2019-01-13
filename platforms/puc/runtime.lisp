@@ -10,4 +10,6 @@
         (event/queue! computer (list "char" input-char)))
       (event/queue! computer (list "key" 28 false))
       (event/queue! computer (list "key_up" 28))
-      (event/tick! computer))))
+      (event/tick! computer)))
+  ;; Clear the screen
+  (luaio/write "\x1b[0m\x1b[2J"))
