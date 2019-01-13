@@ -39,11 +39,17 @@
 (defun get-time! ()
   (- (get-time-raw!) startup-time))
 
-(define json
-  (when (.> args :json-file)
-    (dofile (resolve-path (.> args :json-file)))))
+(defun clamp (val min max)
+  (cond
+    [(< val min) min]
+    [(> val max) max]
+    [else val]))
 
 (defun demand-type! (val typename)
   (when (/= (type# val) typename)
     (log!(.. "Invalid type: expected " typename " but got " (type# val))))
   (demand (= (type# val) typename) (.. "Invalid type: expected " typename " but got " (type# val))))
+
+(define json
+  (when (.> args :json-file)
+    (dofile (resolve-path (.> args :json-file)))))

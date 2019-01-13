@@ -80,7 +80,6 @@
                      (list->struct (sort (struct->list ((.> wrapped-funs :list) path))))))
     (.<! vfs :exists (.> wrapped-funs :exists))
     (.<! vfs :isDir (.> wrapped-funs :isDir))
-             ; TODO: make the VFS prevent writing to read-only mounts.
     (.<! vfs :isReadOnly (lambda (path)
                            (if (caddr (list (mount-path mounts path)))
                              true

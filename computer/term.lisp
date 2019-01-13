@@ -1,4 +1,4 @@
-(import util (demand-type! log!))
+(import util (demand-type! log! clamp))
 
 (define colour-to-hex :hidden
   (assoc->struct (map (lambda (colour-n)
@@ -7,7 +7,25 @@
 
 (define supported-colours :hidden
   (map (cut expt 2 <>) (range :from 0 :to 15)))
-(define supported-bw-colours '(0 128 256 32768))
+(define supported-bw-colours :hidden '(0 128 256 32768))
+
+(define default-palette :hidden
+  { 1     '(0.941 0.941 0.941)
+    2     '(0.949 0.698 0.200)
+    4     '(0.898 0.498 0.847)
+    8     '(0.600 0.698 0.949)
+    16    '(0.871 0.871 0.424)
+    32    '(0.498 0.800 0.098)
+    64    '(0.949 0.698 0.800)
+    128   '(0.298 0.298 0.298)
+    256   '(0.600 0.600 0.600)
+    512   '(0.298 0.600 0.698)
+    1024  '(0.698 0.400 0.898)
+    2048  '(0.200 0.400 0.800)
+    4096  '(0.498 0.400 0.298)
+    8192  '(0.341 0.651 0.306)
+    16384 '(0.800 0.298 0.298)
+    32768 '(0.067 0.067 0.067) })
 
 (defun assert-colour! (colour is-colour) :hidden
   (demand-type! colour "number")
@@ -21,6 +39,7 @@
 ;;; - setCursorBlink
 ;;; - blit
 ;;; - scroll
+;;; - setPaletteColour (optional)
 (defun create-term (native-term is-colour)
   (letrec
     [(cursor-x 1)
@@ -28,6 +47,7 @@
      (cursor-blink false)
      (text-colour 1) ; White
      (background-colour 32768) ; Black
+     (colour-palette { })
      (term
        { :getSize (.> native-term :getSize)
          :scroll (.> native-term :scroll)
@@ -57,18 +77,23 @@
                           (set! background-colour colour))
          :getPaletteColour (lambda (colour)
                              (assert-colour! colour is-colour)
-                             (if (.> native-term :getPaletteColour)
-                               ((.> native-term :getPaletteColour) colour)
-                               ;; TODO: add lookup table for predefined colours. Maybe keep track of custom palettes set by setPaletteColour?
-                               (splice (list 0 0 0))))
+                             (splice (.> colour-palette colour)))
          :setPaletteColour (lambda (colour r g b)
                              (assert-colour! colour is-colour)
-                             (when (or r g b)
-                               (demand-type! r "number")
-                               (demand-type! g "number")
-                               (demand-type! b "number"))
+                             (cond
+                               [(and r g b)
+                                (progn
+                                  (demand-type! r "number")
+                                  (demand-type! g "number")
+                                  (demand-type! b "number")
+                                  (.<! colour-palette colour (list (clamp r 0 1)
+                                                                   (clamp g 0 1)
+                                                                   (clamp b 0 1))))]
+                               ;; TODO: hex colours
+                               [else (.<! colour-palette colour (.> default-palette colour))])
                              (when (.> native-term :setPaletteColour)
-                               ((.> native-term :setPaletteColour) colour r g b)))
+                               ((.> native-term :setPaletteColour) colour
+                                                                   (splice (.> colour-palette colour)))))
 
          :clearLine (lambda ()
                       (let* [((prev-cursor-x prev-cursor-y) ((.> term :getCursorPos)))
@@ -99,6 +124,11 @@
     ;; Reset native cursor to its standard position
     ((.> native-term :setCursorPos) cursor-x cursor-y)
     ((.> native-term :setCursorBlink) cursor-blink)
+    ;; Apply default palette to native terminal
+    (do [(colour (if is-colour
+                  supported-colours
+                  supported-bw-colours))]
+      ((.> term :setPaletteColour) colour))
     ;; Add aliases
     (merge term
            { :isColor (.> term :isColour)
