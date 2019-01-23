@@ -1,4 +1,5 @@
 (import lua/io luaio)
+(import util (run-program!))
 
 (defun rgb-to-colour256 (r g b) :hidden
   (let* [(r6 (math/min 5 (math/floor (* r 6))))
@@ -10,12 +11,6 @@
   (string/format "%01x" (/ (math/log colour) (math/log 2))))
 
 (define write! :hidden luaio/write)
-
-(defun run-program! (prg) :hidden
-  (let* [(handle (luaio/popen prg))
-         (output (self handle :read "*a"))]
-    (self handle :close)
-    output))
 
 (defun create ()
   (with (palette-colour256-str { })

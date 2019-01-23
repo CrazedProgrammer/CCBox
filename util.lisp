@@ -1,5 +1,6 @@
 (import lua/basic (_ENV _G dofile type#))
 (import lua/os os)
+(import lua/io luaio)
 (import config (args))
 (import io)
 
@@ -27,6 +28,11 @@
       result
       (error! (format nil "Could not read file \"{#path}\"")))))
 
+(defun run-program! (prg)
+  (let* [(handle (luaio/popen prg))
+         (output (self handle :read "*a"))]
+    (self handle :close)
+    output))
 
 (defun get-time-raw! () :hidden
   (case (get-platform)
