@@ -12,9 +12,10 @@
     (let* ([tmp-path (luaos/tmpname)]
            [exit-code (luaos/execute (.. "bash -c 'IFS= read -r -s -t 0.001 CCBOX_INPUT; echo \"$CCBOX_INPUT\" > " tmp-path "' &> /dev/null"))]
            [all-input (read-all! tmp-path)])
-      (luaos/remove tmp-path)
+      (run-program! "stty raw -echo")
       ((.> computer :term :setCursorPos) ((.> computer :term :getCursorPos)))
       (luaos/execute "sleep 0.049")
+      (luaos/remove tmp-path)
       (do [(input (reverse (drop (reverse (string/split all-input "")) 1)))]
         (case input
           ["\x03" (.<! computer :running false)]
