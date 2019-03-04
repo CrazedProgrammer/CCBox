@@ -21,8 +21,8 @@
                       (write! (.. "\x1b[" (tostring y) ";" (tostring x) "H")))
       :setCursorBlink (lambda (blink)
                         (write! (if blink
-                                  "\x1b[5m"
-                                  "\x1b[25m")))
+                                  "\x1b[?25h"
+                                  "\x1b[?25l")))
       :blit (lambda (str-blit text-blit background-blit)
               (let* [(buffer '())
                      (current-text nil)
