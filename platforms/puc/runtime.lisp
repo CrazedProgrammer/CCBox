@@ -3,7 +3,7 @@
 (import lua/os luaos)
 (import io (read-all!))
 (import util (log! run-program!))
-(import platforms/puc/keys ())
+(import platforms/puc/input (input->events))
 
 (define write! :hidden luaio/write)
 
@@ -21,18 +21,10 @@
         (run-program! "stty raw -echo")
         ((.> computer :term :setCursorPos) ((.> computer :term :getCursorPos)))
         (luaos/execute "sleep 0.049")
-        (do [(input (reverse (drop (reverse (string/split all-input "")) 1)))]
-          (case input
-            ["\x03" (.<! computer :running false)]
-            ["\x14" (event/queue! computer (list "terminate"))]
-            [else (with (keychar (parse-key (list input)))
-                    (when keychar ; TODO: handle all characters, including those with escape codes (for example the arrow keys).
-                      (progn
-                        (when (car keychar)
-                          (event/queue! computer (list "key" (car keychar)))
-                          (event/queue! computer (list "key_up" (car keychar))))
-                        (when (cadr keychar)
-                          (event/queue! computer (list "char" (cadr keychar)))))))])))
+        (do [(event (input->events all-input))]
+          (if (= event "quit")
+            (.<! computer :running false)
+            (event/queue! computer event))))
       (with (new-terminal-size (get-term-size-str!))
         (when (/= terminal-size new-terminal-size)
           (set! terminal-size new-terminal-size)

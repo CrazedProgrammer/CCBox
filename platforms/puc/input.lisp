@@ -131,3 +131,18 @@
       (list nil
             ch))))
 
+(defun input->events (all-input)
+  (let* [(events '())]
+    (do [(input (reverse (drop (reverse (string/split all-input "")) 1)))]
+      (case input
+        ["\x03" (push! events "quit")]
+        ["\x14" (push! events (list "terminate"))]
+        [else (with (keychar (parse-key (list input)))
+                (when keychar ; TODO: handle all characters, including those with escape codes (for example the arrow keys).
+                  (progn
+                    (when (car keychar)
+                      (push! events (list "key" (car keychar)))
+                      (push! events (list "key_up" (car keychar))))
+                    (when (cadr keychar)
+                      (push! events (list "char" (cadr keychar)))))))]))
+    events))
