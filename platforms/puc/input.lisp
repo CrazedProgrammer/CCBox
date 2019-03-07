@@ -1,7 +1,20 @@
+(import util (log!))
+
 (define special-key-map :hidden
   { "\x0d" "enter"
     "\x7f" "backspace"
-    "\x09" "tab" })
+    "\x09" "tab"
+    "\27[A" "up"
+    "\27[B" "down"
+    "\27[C" "right"
+    "\27[D" "left"
+    "\27" "leftCtrl"
+    "\27[2~" "insert"
+    "\27[3~" "delete"
+    "\27[H" "home"
+    "\27[F" "end"
+    "\27[5~" "pageUp"
+    "\27[6~" "pageDown" })
 
 (define key-map :hidden
   { "a" 30
@@ -123,22 +136,37 @@
     "z" 44
     "zero" 11 })
 
-(defun parse-key (chars)
-  (with (ch (car chars))
-    (if (.> special-key-map ch)
-      (list (.> key-map (.> special-key-map ch))
-            nil)
-      (list nil
-            ch))))
+(define ansi-escape-pattern :hidden "[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]")
+
+(defun parse-key (key) :hidden
+  (if (.> special-key-map key)
+    (list (.> key-map (.> special-key-map key))
+          nil)
+    (list nil
+          key)))
+
+(defun split-input (all-input) :hidden
+  (let* [(idx 1)
+         (input-parts '())]
+    (while (<= idx (n all-input))
+      (with ((start end) (string/find all-input ansi-escape-pattern idx))
+        (if (and start (= start idx))
+          (progn
+            (push! input-parts (string/sub all-input start end))
+            (set! idx (+ idx (+ (- end start) 1))))
+          (progn
+            (push! input-parts (string/sub all-input idx idx))
+            (inc! idx)))))
+    input-parts))
 
 (defun input->events (all-input)
   (let* [(events '())]
-    (do [(input (reverse (drop (reverse (string/split all-input "")) 1)))]
+    (do [(input (split-input (string/sub all-input 1 -2)))]
       (case input
         ["\x03" (push! events "quit")]
         ["\x14" (push! events (list "terminate"))]
-        [else (with (keychar (parse-key (list input)))
-                (when keychar ; TODO: handle all characters, including those with escape codes (for example the arrow keys).
+        [else (with (keychar (parse-key input))
+                (when keychar ; TODO: Properly handle modifier keys.
                   (progn
                     (when (car keychar)
                       (push! events (list "key" (car keychar)))
