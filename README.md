@@ -32,7 +32,7 @@ usage: ccbox [--help] [--boot BOOT-FILE] [--log LOG-FILE] [--command STARTUP-COM
 
 # Building
 Compiling is done with the [Urn](https://gitlab.com/urn/urn) compiler:  
-`urn main.lisp -o ccbox`
+`cd src; urn main.lisp -o ccbox`
 
 # Download
 It is recommended you build this program yourself (see Building), as this download can be outdated.  
