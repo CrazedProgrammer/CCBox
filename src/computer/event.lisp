@@ -32,7 +32,7 @@
     timer-id))
 
 (defun set-alarm! (event-env timeout) :hidden
-  ;; TODO
+  ;; TODO: Implement alarms.
   )
 
 (defun cancel-timer! (event-env timer-id) :hidden
@@ -45,7 +45,7 @@
   (queue-event! (.> computer :event-env) event))
 
 (defun tick! (computer)
-  (let* [(event-env (.> computer :event-env)) ; TODO: find a more pure way of doing this
+  (let* [(event-env (.> computer :event-env)) ; TODO: Find a more pure way of doing this.
          (queued-events (.> event-env :queued-events))
          (current-time (get-time!))
          (has-passed? (lambda (timer)

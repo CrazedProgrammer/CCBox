@@ -104,7 +104,7 @@
                      (if (and (elem? mode (list "w" "wb" "a" "ab")) ((.> vfs :isReadOnly) path))
                        (splice (list nil "Permission denied"))
                        ((.> wrapped-funs :open) path mode))))
-             ; TODO: proper wildcard support.
+             ; TODO: Proper wildcard support.
     (.<! vfs :find (lambda (wildcard)
                      (if ((.> wrapped-funs :exists) wildcard)
                        (list wildcard)

@@ -89,7 +89,7 @@
                                   (.<! colour-palette colour (list (clamp r 0 1)
                                                                    (clamp g 0 1)
                                                                    (clamp b 0 1))))]
-                               ;; TODO: hex colours
+                               ;; TODO: Hex colours.
                                [else (.<! colour-palette colour (.> default-palette colour))])
                              (when (.> native-term :setPaletteColour)
                                ((.> native-term :setPaletteColour) colour

@@ -74,7 +74,8 @@
                   (math/floor (/ (get-time!) 60 24)))
            :shutdown (lambda () (.<! computer :running false))
            :reboot (lambda ()
-                     ;; TODO: find a nice way to refresh the screen when rebooting
+                     ;; TODO: Find a nice way to refresh the screen when rebooting.
+                     ;; TODO: Fix temporary filesystem not flushing when shutting down after a reboot.
                      (.<! computer :coroutine (create-coroutine computer))) })
     (.<! global :rs (.> global :redstone))
     (when (not (.> computer :spec :disable-networking))

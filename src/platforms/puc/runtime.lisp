@@ -15,7 +15,7 @@
   (let* ([terminal-size (get-term-size-str!)]
          [tmp-path (luaos/tmpname)])
     (while (.> computer :running)
-      ;; TODO: Fix cursor jumping all around
+      ;; TODO: Fix cursor jumping all around.
       (let* ([exit-code (luaos/execute (.. "bash -c 'IFS= read -r -s -t 0.001 CCBOX_INPUT; echo \"$CCBOX_INPUT\" > " tmp-path "' &> /dev/null"))]
              [all-input (read-all! tmp-path)])
         (run-program! "stty raw -echo")

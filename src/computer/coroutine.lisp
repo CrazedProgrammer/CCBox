@@ -28,5 +28,5 @@
           (cadr result))))))
 
 (defun close! (computer)
-  ;; TODO: don't expose this globally
+  ;; TODO: Don't expose this globally.
   ((.> computer :vfs :closeAll)))
