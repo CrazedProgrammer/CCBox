@@ -1,5 +1,20 @@
 (import lua/io luaio)
-(import util (run-program!))
+(import util (write! log! run-program!))
+
+(define char-map
+  (assoc->struct (map (lambda (code)
+                        (list (string/char code)
+                          (cond
+                            [(< code 32) " "]
+                            [(> code 127) " "]
+                            [true (string/char code)])))
+                      (range :from 0 :to 255))))
+
+(defun fallback-color-char (hex-char) :hidden
+  ; TODO: Create a lookup table for this.
+  (if (tonumber hex-char 16)
+    (string/lower hex-char)
+    "f"))
 
 (defun rgb-to-colour256 (r g b) :hidden
   (let* [(r6 (math/min 5 (math/floor (* r 6))))
@@ -9,8 +24,6 @@
 
 (defun colour-to-hex (colour) :hidden
   (string/format "%01x" (/ (math/log colour) (math/log 2))))
-
-(define write! :hidden luaio/write)
 
 (defun create ()
   (with (palette-colour256-str { })
@@ -28,15 +41,15 @@
                      (current-text nil)
                      (current-background nil)]
                 (for i 1 (len# str-blit) 1
-                  (let* [(str-c (string/sub str-blit i i))
+                  (let* [(str-c (.> char-map (string/sub str-blit i i)))
                          (text-c (string/sub text-blit i i))
                          (background-c (string/sub background-blit i i))]
                     (when (/= current-text text-c)
                       (push! buffer
-                             (.. "\x1b[38:5:" (.> palette-colour256-str text-c) "m")))
+                             (.. "\x1b[38:5:" (.> palette-colour256-str (fallback-color-char text-c)) "m")))
                     (when (/= current-background background-c)
                       (push! buffer
-                             (.. "\x1b[48:5:" (.> palette-colour256-str background-c) "m")))
+                             (.. "\x1b[48:5:" (.> palette-colour256-str (fallback-color-char background-c)) "m")))
                     (push! buffer str-c)))
                 (write! (concat buffer ""))))
       :scroll (lambda (lines)

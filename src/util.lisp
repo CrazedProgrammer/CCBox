@@ -6,6 +6,8 @@
 
 (define version "0.2.0-pre")
 
+(define write! luaio/write)
+
 (defun log! (message)
   (when (.> args :log-file)
     (let* [(clock (get-time!))

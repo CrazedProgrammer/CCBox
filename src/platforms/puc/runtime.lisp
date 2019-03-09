@@ -2,10 +2,8 @@
 (import lua/io luaio)
 (import lua/os luaos)
 (import io (read-all!))
-(import util (log! run-program!))
+(import util (write! log! run-program!))
 (import platforms/puc/input (input->events))
-
-(define write! :hidden luaio/write)
 
 (defun get-term-size-str! ()
   (.. (run-program! "tput cols") " " (run-program! "tput lines")))
