@@ -12,8 +12,9 @@
 
 (defun start! (computer)
   (run-program! "stty raw -echo")
-  ;; Enable mouse click tracking.
+  ;; Enable mouse click tracking with SGR extended attributes.
   (write! "\x1b[?1002h")
+  (write! "\x1b[?1006h")
   (let* ([terminal-size (get-term-size-str!)]
          [tmp-path (luaos/tmpname)])
     (while (.> computer :running)
@@ -36,5 +37,6 @@
   (write! "\x1b[0m\x1b[2J")
   ;; Disable mouse click tracking.
   (write! "\x1b[?1002l")
+  (write! "\x1b[?1006l")
   ;; Enable cursor blink
   (write! "\x1b[?25h"))

@@ -136,9 +136,12 @@
     "z" 44
     "zero" 11 })
 
+(define mouse-input-pattern "\27%[%<[;%d]*[mM]")
+(define ansi-input-pattern "[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]")
+
 (define input-patterns :hidden
-  (list "\27%[M..." ; Mouse button tracking
-        "[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]" ; ANSI escape sequence
+  (list mouse-input-pattern ; Mouse button tracking
+        ansi-input-pattern ; ANSI escape sequence
         "."))
 
 (defun parse-key (key) :hidden
@@ -153,7 +156,7 @@
          (input-parts '())
          (found-pattern false)]
     (while (<= idx (n all-input))
-      (with (found-length-1
+      (with (found-length-1 ; Length minus one
              (car (filter
                     (lambda (x) (not (nil? x)))
                     (map (lambda (pattern)
@@ -165,18 +168,40 @@
         (set! idx (+ idx found-length-1 1))))
     input-parts))
 
+(defun mouse-input->event (input) :hidden
+  (let* [(mouse-pressed? (= (string/sub input (n input) (n input)) "M"))
+         (codes (map tonumber (string/split (string/sub input 4 -2) ";")))
+         (mouse-code (car codes))
+         (mouse-x (cadr codes))
+         (mouse-y (caddr codes))]
+    (log! (.. "mouse: pressed:" (tostring mouse-pressed?) " code:" mouse-code " x:" mouse-x " y:" mouse-y))
+    ;; TODO: Mouse wheel tracking.
+    (case (list mouse-pressed? mouse-code)
+      [(true 0) (list "mouse_click" 1 mouse-x mouse-y)]
+      [(true 2) (list "mouse_click" 2 mouse-x mouse-y)]
+      [(true 32) (list "mouse_drag" 1 mouse-x mouse-y)]
+      [(true 34) (list "mouse_drag" 2 mouse-x mouse-y)]
+      [(false 0) (list "mouse_up" 1 mouse-x mouse-y)]
+      [(false 2) (list "mouse_up" 2 mouse-x mouse-y)]
+      [else nil])))
+
 (defun input->events (all-input)
   (let* [(events '())]
     (do [(input (split-input (string/sub all-input 1 -2)))]
       (case input
         ["\x03" (push! events "quit")]
         ["\x14" (push! events (list "terminate"))]
-        [else (with (keychar (parse-key input))
-                (when keychar ; TODO: Properly handle modifier keys.
-                  (progn
-                    (when (car keychar)
-                      (push! events (list "key" (car keychar)))
-                      (push! events (list "key_up" (car keychar))))
-                    (when (cadr keychar)
-                      (push! events (list "char" (cadr keychar)))))))]))
+        [else
+         (if (= (string/find input mouse-input-pattern) 1)
+           (with (mouse-event (mouse-input->event input))
+             (when mouse-event
+               (push! events mouse-event)))
+           (with (keychar (parse-key input))
+             (when keychar ; TODO: Properly handle modifier keys.
+               (progn
+                 (when (car keychar)
+                   (push! events (list "key" (car keychar)))
+                   (push! events (list "key_up" (car keychar))))
+                 (when (cadr keychar)
+                   (push! events (list "char" (cadr keychar))))))))]))
     events))
