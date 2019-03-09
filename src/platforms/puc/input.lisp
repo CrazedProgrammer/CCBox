@@ -136,7 +136,10 @@
     "z" 44
     "zero" 11 })
 
-(define ansi-escape-pattern :hidden "[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]")
+(define input-patterns :hidden
+  (list "\27%[M..." ; Mouse button tracking
+        "[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]" ; ANSI escape sequence
+        "."))
 
 (defun parse-key (key) :hidden
   (if (.> special-key-map key)
@@ -147,16 +150,19 @@
 
 (defun split-input (all-input) :hidden
   (let* [(idx 1)
-         (input-parts '())]
+         (input-parts '())
+         (found-pattern false)]
     (while (<= idx (n all-input))
-      (with ((start end) (string/find all-input ansi-escape-pattern idx))
-        (if (and start (= start idx))
-          (progn
-            (push! input-parts (string/sub all-input start end))
-            (set! idx (+ idx (+ (- end start) 1))))
-          (progn
-            (push! input-parts (string/sub all-input idx idx))
-            (inc! idx)))))
+      (with (found-length-1
+             (car (filter
+                    (lambda (x) (not (nil? x)))
+                    (map (lambda (pattern)
+                           (with ((start end) (string/find all-input pattern idx))
+                             (when (and start (= start idx))
+                               (- end start))))
+                           input-patterns))))
+        (push! input-parts (string/sub all-input idx (+ idx found-length-1)))
+        (set! idx (+ idx found-length-1 1))))
     input-parts))
 
 (defun input->events (all-input)

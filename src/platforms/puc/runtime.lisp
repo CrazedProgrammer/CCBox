@@ -12,6 +12,8 @@
 
 (defun start! (computer)
   (run-program! "stty raw -echo")
+  ;; Enable mouse click tracking.
+  (write! "\x1b[?1002h")
   (let* ([terminal-size (get-term-size-str!)]
          [tmp-path (luaos/tmpname)])
     (while (.> computer :running)
@@ -32,5 +34,7 @@
       (event/tick! computer)))
   ;; Clear the screen
   (write! "\x1b[0m\x1b[2J")
+  ;; Disable mouse click tracking.
+  (write! "\x1b[?1002l")
   ;; Enable cursor blink
   (write! "\x1b[?25h"))
