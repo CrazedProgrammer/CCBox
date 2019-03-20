@@ -6,7 +6,7 @@
                         (list (string/char code)
                           (cond
                             [(< code 32) " "]
-                            [(> code 127) " "]
+                            [(> code 126) " "]
                             [true (string/char code)])))
                       (range :from 0 :to 255))))
 
