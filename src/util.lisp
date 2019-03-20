@@ -39,7 +39,7 @@
 (defun get-time-raw! () :hidden
   (case (get-platform)
     [cc (os/clock)]
-    [puc (os/time)]))
+    [puc (/ (tonumber (run-program! "date +%s%N")) 1000000000)]))
 
 (define startup-time :hidden
   (get-time-raw!))
