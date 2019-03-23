@@ -1,4 +1,5 @@
 (import lua/basic (type# _G))
+(import math/bit32 bit32)
 (import computer/coroutine (create-coroutine))
 (import util (get-time! version))
 (import computer/event event)
@@ -59,6 +60,27 @@
     (.<! global :disk nil-disk)
     (.<! global :peripheral nil-peripheral)
     (.<! global :redstone nil-redstone)
+    (.<! global :bit
+         { :blshift       bit32/shl
+           :brshift       bit32/ashr
+           :blogic_rshift bit32/shr
+           :bxor          bit32/bit-xor
+           :bor           bit32/bit-or
+           :band          bit32/bit-and
+           :bnot          bit32/bit-not })
+    (.<! global :bit32
+         { :blshift       bit32/shl
+           :barshift      bit32/ashr
+           :brshift       bit32/shr
+           :bxor          bit32/bit-xor
+           :bor           bit32/bit-or
+           :band          bit32/bit-and
+           :bnot          bit32/bit-not
+           :btest         bit32/bit-test
+           :extract       bit32/bit-extract
+           :replace       bit32/bit-replace
+           :lrotate       bit32/bit-rotl
+           :rrotate       bit32/bit-rotr })
     (.<! global :os
          { :getComputerID (lambda () (.> computer :id))
            :getComputerLabel (lambda () (.> computer :label))
