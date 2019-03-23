@@ -1,9 +1,8 @@
-(import config (args))
 (import util (get-platform))
 (import platforms/cc/runtime cc/runtime)
-(import platforms/cc/term cc/term)
+(import platforms/cc cc)
 (import platforms/puc/runtime puc/runtime)
-(import platforms/puc/term puc/term)
+(import platforms/puc puc)
 
 (defun start-runtime! (computer)
   (case (get-platform)
@@ -11,8 +10,8 @@
     [puc (puc/runtime/start! computer)]
     [else (error! "suitable runtime not found")]))
 
-(defun create-native-term ()
+(defun create-libs ()
   (case (get-platform)
-    [cc (cc/term/create)]
-    [puc (puc/term/create)]
-    [else (error! "suitable terminal not found")]))
+    [cc (cc/create-libs)]
+    [puc (puc/create-libs)]
+    [else (error! "suitable libraries not found")]))

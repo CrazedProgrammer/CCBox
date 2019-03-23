@@ -1,6 +1,7 @@
 (import lua/basic (type# _G))
 (import computer/coroutine (create-coroutine))
 (import util (get-time! version))
+(import computer/event event)
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"
@@ -79,7 +80,14 @@
                      (.<! computer :coroutine (create-coroutine computer))) })
     (.<! global :rs (.> global :redstone))
     (when (not (.> computer :spec :disable-networking))
-      (.<! global :http (when (.> _G :http) (merge (.> _G :http) {})))
-      (.<! global :socket (when (.> _G :socket) (merge (.> _G :socket) {}))))
+      (.<! global :http { :request ((.> computer :platform-libs :http-request) computer)
+                          :checkURL (lambda (url)
+                                      (event/queue!
+                                        computer
+                                        (append
+                                          (list "http_check" url)
+                                          (if (string/find url "https?%:%/%/")
+                                            (list true)
+                                            (list false "URL malformed")))))} ))
     (.<! global :fs (.> computer :vfs))
     global))
