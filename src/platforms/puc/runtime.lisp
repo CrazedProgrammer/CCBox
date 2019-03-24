@@ -30,7 +30,8 @@
         (when (/= terminal-size new-terminal-size)
           (set! terminal-size new-terminal-size)
           (event/queue! computer (list "term_resize"))))
-      (event/tick! computer)))
+      (event/tick! computer))
+    (luaos/remove tmp-path))
   ;; Clear the screen
   (write! "\x1b[0m\x1b[2J")
   ;; Disable mouse click tracking.
