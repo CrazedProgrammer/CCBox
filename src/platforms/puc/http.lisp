@@ -11,7 +11,7 @@
          (string/split raw-name "%-"))
     "-"))
 
-(defun parse-http-response (all-headers)
+(defun parse-http-response (all-headers) :hidden
   (let* [(status-code (tonumber (cadr (string/split all-headers " "))))
          (headers
            (assoc->struct
@@ -23,20 +23,28 @@
                   (cdr (string/split all-headers "\r\n")))))]
     (values-list status-code headers)))
 
+(defun headers->curl-options (headers) :hidden
+  (string/concat
+    (map (lambda (header-name)
+           (.. "-H " (string/quoted (.. header-name ": " (.> headers header-name)))))
+         (keys headers))
+    " "))
+
 (defun request (computer)
-  (lambda (url post headers binary)
-    (let* [(all-response-parts (string/split (run-program! (.. "curl -sLD - \"" url "\"")) "\r\n\r\n"))
+  (lambda (url postData (headers {}) binary)
+    (let* [(curl-invocation (.. "curl -sLD - " (headers->curl-options headers) " " (string/quoted url)))
+           (all-response-parts (string/split (run-program! curl-invocation) "\r\n\r\n"))
            (n-redirect-headers (n (take-while (lambda (all-headers)
-                                                (with ((status-code headers) (parse-http-response all-headers))
-                                                  (or (= status-code 301) (= status-code 302))))
+                                                (with ((response-code headers) (parse-http-response all-headers))
+                                                  (or (= response-code 301) (= response-code 302))))
                                               all-response-parts
                                               1)))
-           ((status-code headers) (parse-http-response (nth all-response-parts (+ n-redirect-headers 1))))
+           ((response-code response-headers) (parse-http-response (nth all-response-parts (+ n-redirect-headers 1))))
            (response (string/concat (drop all-response-parts (+ n-redirect-headers 1)) "\r\n\r\n"))
            (handle
              { :readAll (const response)
-               :getResponseCode (const status-code)
-               :getResponseHeaders (const headers)
+               :getResponseCode (const response-code)
+               :getResponseHeaders (const response-headers)
                :close (const nil)})]
       ; TODO: implement other HTTP methods and request headers
       (event/queue! computer (list "http_success" url handle))
