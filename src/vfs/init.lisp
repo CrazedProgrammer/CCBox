@@ -104,7 +104,7 @@
                      (if (and (elem? mode (list "w" "wb" "a" "ab")) ((.> vfs :isReadOnly) path))
                        (splice (list nil "Permission denied"))
                        ((.> wrapped-funs :open) path mode))))
-             ; TODO: Proper wildcard support.
+    ;; TODO: Proper wildcard support
     (.<! vfs :find (lambda (wildcard)
                      (if ((.> wrapped-funs :exists) wildcard)
                        (list wildcard)
@@ -123,7 +123,7 @@
                                (map (lambda (name)
                                       (if (= (string/sub name 1 (n partial-name)) partial-name)
                                         name "nil"))))))))
-    ; Copy and move need to be done manually in order to support copying across mounts.
+    ;; Copy and move need to be done manually in order to support copying across mounts
     (.<! vfs :copy
          (lambda (raw-from-path raw-to-path)
            (let* [(from-path (canonicalise raw-from-path))

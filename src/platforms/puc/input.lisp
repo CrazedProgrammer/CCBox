@@ -175,7 +175,7 @@
          (mouse-x (cadr codes))
          (mouse-y (caddr codes))]
     (log! (.. "mouse: pressed:" (tostring mouse-pressed?) " code:" mouse-code " x:" mouse-x " y:" mouse-y))
-    ;; TODO: Mouse wheel tracking.
+    ;; TODO: Implement mouse wheel tracking
     (case (list mouse-pressed? mouse-code)
       [(true 0) (list "mouse_click" 1 mouse-x mouse-y)]
       [(true 2) (list "mouse_click" 2 mouse-x mouse-y)]
@@ -197,7 +197,7 @@
              (when mouse-event
                (push! events mouse-event)))
            (with (keychar (parse-key input))
-             (when keychar ; TODO: Properly handle modifier keys.
+             (when keychar ; TODO: Properly handle modifier keys
                (progn
                  (when (car keychar)
                    (push! events (list "key" (car keychar)))

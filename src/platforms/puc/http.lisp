@@ -4,7 +4,7 @@
 (import computer/event event)
 
 (defun recapitalise-header-name (raw-name) :hidden
-  ;; TODO: implement all special cases that CC expects to be handled
+  ;; TODO: Implement all special cases that CC expects to be handled
   ;; See https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/codec-http/src/main/java/io/netty/handler/codec/http/HttpHeaders.java
   (concat
     (map (lambda (word)
@@ -59,6 +59,6 @@
                :close (const nil)})]
       (when postData
         (luaos/remove post-file-path))
-      ; TODO: implement other HTTP methods and request headers
+      ;; TODO: Implement proper (binary) handles
       (event/queue! computer (list "http_success" url handle))
       true)))

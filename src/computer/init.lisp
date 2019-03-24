@@ -19,7 +19,7 @@
                      :vfs (create-vfs (.> spec :vfs-mounts) (.> spec :enable-runtime-mount)) })]
       (.<! computer :env (create-env computer))
       (.<! computer :coroutine (create-coroutine computer))
-      ; Boot the computer
+      ;; Boot the computer
       (event/queue! computer '())
       (event/tick! computer)
 

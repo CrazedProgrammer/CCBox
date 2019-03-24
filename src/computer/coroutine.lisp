@@ -22,11 +22,11 @@
           (error! (.. "computer panicked! error: \n" (tostring (cadr result)))))
         (progn
           (log! (.. "event: " (pretty args)))
-          ;; TODO: verify if this is the correct place to put this in
+          ;; TODO: Verify if this is the correct place to put this in
           (when (not (.> computer :running))
             (close! computer))
           (cadr result))))))
 
 (defun close! (computer)
-  ;; TODO: Don't expose this globally.
+  ;; TODO: Don't expose this globally
   ((.> computer :vfs :closeAll)))

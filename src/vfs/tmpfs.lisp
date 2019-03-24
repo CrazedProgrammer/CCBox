@@ -67,7 +67,7 @@
       (error! "Could not open file for writing")
       (progn
         (access-tree! fs-tree path contents)
-        ; TODO: Optimise this so it doesn't traverse the tree on every write.
+        ;; TODO: Optimise this so it doesn't traverse the tree on every write
         (if binary
           (create-handle
             { :write (lambda (b)

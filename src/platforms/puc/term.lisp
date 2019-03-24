@@ -1,6 +1,9 @@
 (import lua/io luaio)
 (import util (write! log! run-program!))
 
+;; TODO: Improve performance
+;; TODO: Use unicode characters for characters in the upper range
+
 (define char-map
   (assoc->struct (map (lambda (code)
                         (list (string/char code)
@@ -11,7 +14,7 @@
                       (range :from 0 :to 255))))
 
 (defun fallback-color-char (hex-char) :hidden
-  ; TODO: Create a lookup table for this.
+  ;; TODO: Create a lookup table for this
   (if (tonumber hex-char 16)
     (string/lower hex-char)
     "f"))
