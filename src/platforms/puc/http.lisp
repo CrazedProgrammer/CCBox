@@ -11,20 +11,28 @@
          (string/split raw-name "%-"))
     "-"))
 
+(defun parse-http-response (all-headers)
+  (let* [(status-code (tonumber (cadr (string/split all-headers " "))))
+         (headers
+           (assoc->struct
+             (map (lambda (line)
+                    (let* [(parts (string/split line "%: "))
+                           (raw-name (car parts))
+                           (value (cadr parts))]
+                      (list (recapitalise-header-name raw-name) value)))
+                  (cdr (string/split all-headers "\r\n")))))]
+    (values-list status-code headers)))
+
 (defun request (computer)
   (lambda (url post headers binary)
-    (let* [(all-response (run-program! (.. "curl -sD - \"" url "\"")))
-           (all-headers (string/sub all-response 1 (- (string/find all-response "\r\n\r\n") 1)))
-           (status-code (tonumber (cadr (string/split all-headers " "))))
-           (headers
-             (assoc->struct
-               (map (lambda (line)
-                      (let* [(parts (string/split line "%: "))
-                             (raw-name (car parts))
-                             (value (cadr parts))]
-                        (list (recapitalise-header-name raw-name) value)))
-                    (cdr (string/split all-headers "\r\n")))))
-           (response (string/sub all-response (+ (string/find all-response "\r\n\r\n") 4) -1))
+    (let* [(all-response-parts (string/split (run-program! (.. "curl -sLD - \"" url "\"")) "\r\n\r\n"))
+           (n-redirect-headers (n (take-while (lambda (all-headers)
+                                                (with ((status-code headers) (parse-http-response all-headers))
+                                                  (or (= status-code 301) (= status-code 302))))
+                                              all-response-parts
+                                              1)))
+           ((status-code headers) (parse-http-response (nth all-response-parts (+ n-redirect-headers 1))))
+           (response (string/concat (drop all-response-parts (+ n-redirect-headers 1)) "\r\n\r\n"))
            (handle
              { :readAll (const response)
                :getResponseCode (const status-code)
