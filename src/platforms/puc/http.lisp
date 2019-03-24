@@ -1,4 +1,6 @@
 (import util (run-program! log!))
+(import io (write-all!))
+(import lua/os luaos)
 (import computer/event event)
 
 (defun recapitalise-header-name (raw-name) :hidden
@@ -32,7 +34,16 @@
 
 (defun request (computer)
   (lambda (url postData (headers {}) binary)
-    (let* [(curl-invocation (.. "curl -sLD - " (headers->curl-options headers) " " (string/quoted url)))
+    (let* [(post-file-path (when postData
+                             (with (tmp-path (luaos/tmpname))
+                               (write-all! tmp-path postData)
+                               tmp-path)))
+           (curl-invocation (.. "curl -sLD - "
+                                (headers->curl-options headers) " "
+                                (if postData
+                                  (.. "--data-binary " (string/quoted (.. "@" post-file-path)) " ")
+                                  "")
+                                (string/quoted url)))
            (all-response-parts (string/split (run-program! curl-invocation) "\r\n\r\n"))
            (n-redirect-headers (n (take-while (lambda (all-headers)
                                                 (with ((response-code headers) (parse-http-response all-headers))
@@ -46,6 +57,8 @@
                :getResponseCode (const response-code)
                :getResponseHeaders (const response-headers)
                :close (const nil)})]
+      (when postData
+        (luaos/remove post-file-path))
       ; TODO: implement other HTTP methods and request headers
       (event/queue! computer (list "http_success" url handle))
       true)))
