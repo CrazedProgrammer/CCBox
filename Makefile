@@ -1,7 +1,7 @@
-URN=urn
-COMPILEFLAGS=./src/main.lisp -i ./src -o ./testenv/ccbox
-PROFILEFLAGS=--profile=stack --stack-show=flame
-RUNFLAGS=--run -- --json ./testenv/json.lua --boot ./testenv/bios.lua --log ./testenv/log.txt tw:/:./testenv/ccfs.json
+URN = urn
+override COMPILEFLAGS += ./src/main.lisp -i ./src -o ./testenv/ccbox
+override PROFILEFLAGS += --profile=stack --stack-show=flame
+override RUNFLAGS += --run -- --json ./testenv/json.lua --boot ./testenv/bios.lua --log ./testenv/log.txt tw:/:./testenv/ccfs.json
 
 testenv:
 	mkdir testenv
