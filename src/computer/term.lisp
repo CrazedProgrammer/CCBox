@@ -1,4 +1,4 @@
-(import util (demand-type! log! clamp))
+(import util (demand-type! log! clamp list->true-map))
 
 (define colour-to-hex :hidden
   (assoc->struct (map (lambda (colour-n)
@@ -8,6 +8,8 @@
 (define supported-colours :hidden
   (map (cut expt 2 <>) (range :from 0 :to 15)))
 (define supported-bw-colours :hidden '(0 128 256 32768))
+(define supported-colours-map :hidden (list->true-map supported-colours))
+(define supported-bw-colours-map :hidden (list->true-map supported-bw-colours))
 
 (define default-palette :hidden
   { 1     '(0.941 0.941 0.941)
@@ -29,9 +31,7 @@
 
 (defun assert-colour! (colour is-colour) :hidden
   (demand-type! colour "number")
-  (demand (elem? colour (if is-colour
-                          supported-colours
-                          supported-bw-colours))))
+  (demand (.> (if is-colour supported-colours-map supported-bw-colours-map) colour)))
 
 ;;; Reduce required functions of the native terminal implementation to:
 ;;; - getSize

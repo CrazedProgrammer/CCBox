@@ -1,4 +1,5 @@
 (import lua/io luaio)
+(import lua/table luatable)
 (import util (write! log! run-program!))
 
 ;; TODO: Improve performance
@@ -54,7 +55,7 @@
                       (push! buffer
                              (.. "\x1b[48:5:" (.> palette-colour256-str (fallback-color-char background-c)) "m")))
                     (push! buffer str-c)))
-                (write! (concat buffer ""))))
+                (write! (luatable/concat buffer ""))))
       :scroll (lambda (lines)
                 (if (>= lines 0)
                   (.. "\x1b[" lines "S")

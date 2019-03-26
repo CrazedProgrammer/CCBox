@@ -53,10 +53,16 @@
     [(> val max) max]
     [else val]))
 
+(defun list->true-map (xs)
+  (assoc->struct (map (lambda (x)
+                        (list x true))
+                      xs)))
+
 (defun demand-type! (val typename)
-  (when (/= (type# val) typename)
-    (log!(.. "Invalid type: expected " typename " but got " (type# val))))
-  (demand (= (type# val) typename) (.. "Invalid type: expected " typename " but got " (type# val))))
+  (with (error-message (.. "Invalid type: expected " typename " but got " (type# val)))
+    (when (/= (type# val) typename)
+      (log! error-message))
+    (demand (= (type# val) typename) error-message)))
 
 (define json
   (when (.> args :json-file)
