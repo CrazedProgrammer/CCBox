@@ -1,6 +1,7 @@
 URN=urn
-URNFLAGS=
-RUNFLAGS=
+COMPILEFLAGS=./src/main.lisp -i ./src -o ./testenv/ccbox
+PROFILEFLAGS=--profile=stack --stack-show=flame
+RUNFLAGS=--run -- --json ./testenv/json.lua --boot ./testenv/bios.lua --log ./testenv/log.txt tw:/:./testenv/ccfs.json
 
 testenv:
 	mkdir testenv
@@ -9,12 +10,12 @@ testenv:
 	curl https://raw.githubusercontent.com/rxi/json.lua/master/json.lua -o testenv/json.lua
 
 build:
-	$(URN) ./src/main.lisp -i ./src -o ./testenv/ccbox $(URNFLAGS)
+	$(URN) $(COMPILEFLAGS)
 
 run:
-	$(MAKE) build URNFLAGS+="--run -- --json ./testenv/json.lua --boot ./testenv/bios.lua --log ./testenv/log.txt tw:/:./testenv/ccfs.json"
+	$(URN) $(COMPILEFLAGS) $(RUNFLAGS)
 
 profile-run:
-	$(MAKE) run URNFLAGS+="--profile=stack --stack-show=flame" | tee /tmp/urn-output
-	cat /tmp/urn-output | tail -n +6 | head -n -2 | flamegraph.pl > ./testenv/profile.svg
+	$(URN) $(COMPILEFLAGS) $(PROFILEFLAGS) $(RUNFLAGS) | tee /tmp/urn-output
+	cat /tmp/urn-output | tail -n +2 | flamegraph.pl > ./testenv/profile.svg
 	rm /tmp/urn-output
