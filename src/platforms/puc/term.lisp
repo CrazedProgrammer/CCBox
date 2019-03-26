@@ -1,6 +1,6 @@
 (import lua/io luaio)
 (import lua/table luatable)
-(import util (write! log! run-program!))
+(import util (write! log! run-program! push-table!))
 
 ;; TODO: Improve performance
 ;; TODO: Use unicode characters for characters in the upper range
@@ -41,7 +41,7 @@
                                   "\x1b[?25h"
                                   "\x1b[?25l")))
       :blit (lambda (str-blit text-blit background-blit)
-              (let* [(buffer '())
+              (let* [(buffer {})
                      (current-text nil)
                      (current-background nil)]
                 (for i 1 (len# str-blit) 1
@@ -49,12 +49,12 @@
                          (text-c (string/sub text-blit i i))
                          (background-c (string/sub background-blit i i))]
                     (when (/= current-text text-c)
-                      (push! buffer
-                             (.. "\x1b[38:5:" (.> palette-colour256-str (fallback-color-char text-c)) "m")))
+                      (push-table! buffer
+                                   (.. "\x1b[38:5:" (.> palette-colour256-str (fallback-color-char text-c)) "m")))
                     (when (/= current-background background-c)
-                      (push! buffer
-                             (.. "\x1b[48:5:" (.> palette-colour256-str (fallback-color-char background-c)) "m")))
-                    (push! buffer str-c)))
+                      (push-table! buffer
+                                   (.. "\x1b[48:5:" (.> palette-colour256-str (fallback-color-char background-c)) "m")))
+                    (push-table! buffer str-c)))
                 (write! (luatable/concat buffer ""))))
       :scroll (lambda (lines)
                 (if (>= lines 0)

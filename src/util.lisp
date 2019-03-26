@@ -58,6 +58,9 @@
                         (list x true))
                       xs)))
 
+(defmacro push-table! (xs x)
+  `(.<! ,xs (+ (len# ,xs) 1) ,x))
+
 (defun demand-type! (val typename)
   (with (error-message (.. "Invalid type: expected " typename " but got " (type# val)))
     (when (/= (type# val) typename)
