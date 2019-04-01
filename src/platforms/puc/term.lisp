@@ -1,17 +1,36 @@
 (import lua/io luaio)
 (import lua/table luatable)
 (import util (write! log! run-program! push-table!))
+(import math/bit32 (bit-extract))
 
 ;; TODO: Improve performance
 ;; TODO: Use unicode characters for characters in the upper range
 
-(define char-map
+;; TODO: Find some way to draw 6-cell characters instead of 4-cell characters
+(defun block-char->unicode (code) :hidden
+  (let* [(entry-num (- code 128))
+         (quadrants (+ 1
+                       (* 1 (bit-extract code 0))
+                       (* 2 (bit-extract code 1))
+                       (* 4 (bit-extract code 2))
+                       (* 8 (bit-extract code 3))))]
+    (if (= quadrants 1)
+      " "
+      (.. "\xE2\x96"
+          (string/sub (.. "\xFF\x98\x9D\x80"
+                          "\x96\x8C\x9E\x9B"
+                          "\x97\x9A\x90\x9C"
+                          "\x84\x99\x9F\x88")
+                      quadrants
+                      quadrants)))))
+
+(define char-map :hidden
   (assoc->struct (map (lambda (code)
                         (list (string/char code)
                           (cond
-                            [(< code 32) " "]
-                            [(> code 126) " "]
-                            [true (string/char code)])))
+                            [(and (>= code 32) (< code 127)) (string/char code)]
+                            [(and (>= code 128) (< code 160)) (block-char->unicode code)]
+                            [else " "])))
                       (range :from 0 :to 255))))
 
 (defun fallback-color-char (hex-char) :hidden
