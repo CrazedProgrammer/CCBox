@@ -33,11 +33,15 @@
                             [else " "])))
                       (range :from 0 :to 255))))
 
-(defun fallback-color-char (hex-char) :hidden
-  ;; TODO: Create a lookup table for this
-  (if (tonumber hex-char 16)
-    (string/lower hex-char)
-    "f"))
+(define fallback-color-char-map :hidden
+  (assoc->struct (map (lambda (code)
+                        (with (hex-char (string/char code))
+                          (list
+                            hex-char
+                            (if (tonumber hex-char 16)
+                              (string/lower hex-char)
+                              "f"))))
+                      (range :from 0 :to 255))))
 
 (defun rgb-to-colour256 (r g b) :hidden
   (let* [(r6 (math/min 5 (math/floor (* r 6))))
@@ -69,10 +73,10 @@
                          (background-c (string/sub background-blit i i))]
                     (when (/= current-text text-c)
                       (push-table! buffer
-                                   (.. "\x1b[38:5:" (.> palette-colour256-str (fallback-color-char text-c)) "m")))
+                                   (.. "\x1b[38:5:" (.> palette-colour256-str (.> fallback-color-char-map text-c)) "m")))
                     (when (/= current-background background-c)
                       (push-table! buffer
-                                   (.. "\x1b[48:5:" (.> palette-colour256-str (fallback-color-char background-c)) "m")))
+                                   (.. "\x1b[48:5:" (.> palette-colour256-str (.> fallback-color-char-map background-c)) "m")))
                     (push-table! buffer str-c)))
                 (write! (luatable/concat buffer ""))))
       :scroll (lambda (lines)
