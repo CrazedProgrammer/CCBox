@@ -29,7 +29,10 @@
                         (list (string/char code)
                           (cond
                             [(and (>= code 32) (< code 127)) (string/char code)]
+                            [(= code 127) "\xE2\x96\x92"]
                             [(and (>= code 128) (< code 160)) (block-char->unicode code)]
+                            [(and (>= code 161) (< code 192)) (.. "\xC2" (string/char code))]
+                            [(and (>= code 192) (< code 256)) (.. "\xC3" (string/char (- code 64)))]
                             [else " "])))
                       (range :from 0 :to 255))))
 
