@@ -1,6 +1,9 @@
 (import lua/basic (type#))
 (import util (log! read-file-force! resolve-path json))
 (import io (write-all!))
+(import embed (embedded-ccfs))
+
+(define embed-ccfs-path "@embed")
 
 (defun access-tree! (inode path contents) :hidden
   (if (= path "")
@@ -97,7 +100,9 @@
 
 (defun create (file)
   (let* [(fs-tree (if (/= file "")
-                    ((.> json :decode) (read-file-force! (resolve-path file)))
+                    ((.> json :decode) (if (= file embed-ccfs-path)
+                                         embedded-ccfs
+                                         (read-file-force! (resolve-path file))))
                     {}))]
     { :list (lambda (path)
               (with (inode (access-tree! fs-tree path))
@@ -119,6 +124,6 @@
       :delete (lambda (path) (access-tree! fs-tree path false))
       :open (cut open-file! fs-tree <> <>)
       :close (lambda ()
-               (when (/= file "")
+               (when (and (/= file "") (/= file embed-ccfs-path))
                  (write-all! (resolve-path file) ((.> json :encode) fs-tree)))) }))
 

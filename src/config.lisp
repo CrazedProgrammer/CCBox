@@ -16,8 +16,7 @@
 
           (add-argument! spec '("--boot" "-b")
             :name "boot-file"
-            :help "The boot file. Default: ./bios.lua"
-            :default "bios.lua"
+            :help "The boot file."
             :narg 1)
 
           (add-argument! spec '("--log" "-l")

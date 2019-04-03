@@ -1,9 +1,12 @@
 (import util (log! resolve-path read-file-force!))
 (import lua/basic (load getmetatable))
 (import lua/coroutine coroutine)
+(import embed (embedded-bios))
 
 (defun create-coroutine (computer)
-  (let* [(boot-code (read-file-force! (resolve-path (.> computer :spec :boot-file))))
+  (let* [(boot-code (if (.> computer :spec :boot-file)
+                      (read-file-force! (resolve-path (.> computer :spec :boot-file)))
+                      embedded-bios))
          (coroutine (coroutine/create (load boot-code "ccbox-bios.lua" "t" (.> computer :env))))]
     (when (> (n (.> computer :spec :startup-command)) 0)
       (resume! computer '("char" " "))

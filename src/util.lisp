@@ -1,7 +1,8 @@
-(import lua/basic (_ENV _G dofile type#))
+(import lua/basic (_ENV _G dofile type# load))
 (import lua/os os)
 (import lua/io luaio)
 (import config (args))
+(import embed (embedded-json))
 (import io)
 
 (define version "0.2.0-pre")
@@ -68,5 +69,9 @@
     (demand (= (type# val) typename) error-message)))
 
 (define json
-  (when (.> args :json-file)
-    (dofile (resolve-path (.> args :json-file)))))
+  ((load
+    (if (.> args :json-file)
+      (io/read-all! (resolve-path (.> args :json-file)))
+      embedded-json)
+    "json.lua"
+    "t")))
