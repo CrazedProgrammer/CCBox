@@ -3,8 +3,9 @@
 (import util (write! log! run-program! push-table!))
 (import math/bit32 (bit-extract))
 
-;; TODO: Improve performance
-;; TODO: Use unicode characters for characters in the upper range
+;; TODO: Limit the amount of entries in the blit-cache table
+(define blit-cache :hidden { })
+(define blit-cache-max-chars :hidden 3)
 
 ;; TODO: Find some way to draw 6-cell characters instead of 4-cell characters
 (defun block-char->unicode (code) :hidden
@@ -55,6 +56,23 @@
 (defun colour-to-hex (colour) :hidden
   (string/format "%01x" (/ (math/log colour) (math/log 2))))
 
+(defun term-blit-output (palette-colour256-str str-blit text-blit background-blit) :hidden
+  (let* [(buffer {})
+         (current-text nil)
+         (current-background nil)]
+    (for i 1 (len# str-blit) 1
+      (let* [(str-c (.> char-map (string/sub str-blit i i)))
+             (text-c (string/sub text-blit i i))
+             (background-c (string/sub background-blit i i))]
+        (when (/= current-text text-c)
+          (push-table! buffer
+                       (.. "\x1b[38:5:" (.> palette-colour256-str (.> fallback-color-char-map text-c)) "m")))
+        (when (/= current-background background-c)
+          (push-table! buffer
+                       (.. "\x1b[48:5:" (.> palette-colour256-str (.> fallback-color-char-map background-c)) "m")))
+        (push-table! buffer str-c)))
+    (luatable/concat buffer "")))
+
 (defun create ()
   (with (palette-colour256-str { })
     { :getSize (lambda ()
@@ -67,21 +85,14 @@
                                   "\x1b[?25h"
                                   "\x1b[?25l")))
       :blit (lambda (str-blit text-blit background-blit)
-              (let* [(buffer {})
-                     (current-text nil)
-                     (current-background nil)]
-                (for i 1 (len# str-blit) 1
-                  (let* [(str-c (.> char-map (string/sub str-blit i i)))
-                         (text-c (string/sub text-blit i i))
-                         (background-c (string/sub background-blit i i))]
-                    (when (/= current-text text-c)
-                      (push-table! buffer
-                                   (.. "\x1b[38:5:" (.> palette-colour256-str (.> fallback-color-char-map text-c)) "m")))
-                    (when (/= current-background background-c)
-                      (push-table! buffer
-                                   (.. "\x1b[48:5:" (.> palette-colour256-str (.> fallback-color-char-map background-c)) "m")))
-                    (push-table! buffer str-c)))
-                (write! (luatable/concat buffer ""))))
+              (if (<= (string/len str-blit) blit-cache-max-chars)
+                (with (blit-key (.. str-blit text-blit background-blit))
+                  (if (.> blit-cache blit-key)
+                    (write! (.> blit-cache blit-key))
+                    (with (calculated-term-output (term-blit-output palette-colour256-str str-blit text-blit background-blit))
+                      (.<! blit-cache blit-key calculated-term-output)
+                      (write! calculated-term-output))))
+                (write! (term-blit-output palette-colour256-str str-blit text-blit background-blit))))
       :scroll (lambda (lines)
                 (if (>= lines 0)
                   (.. "\x1b[" lines "S")
