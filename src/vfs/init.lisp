@@ -1,7 +1,7 @@
 (import lua/basic (set-idx!))
 (import vfs/ccfs ccfs)
 (import vfs/tmpfs tmpfs)
-(import util (log!))
+(import util (log! escape-pattern-string))
 
 (defun mount-path (mounts path)
   (let* [(abs-path (canonicalise path))
@@ -104,11 +104,6 @@
                      (if (and (elem? mode (list "w" "wb" "a" "ab")) ((.> vfs :isReadOnly) path))
                        (splice (list nil "Permission denied"))
                        ((.> wrapped-funs :open) path mode))))
-    ;; TODO: Proper wildcard support
-    (.<! vfs :find (lambda (wildcard)
-                     (if ((.> wrapped-funs :exists) wildcard)
-                       (list wildcard)
-                       '())))
     (.<! vfs :getDir (lambda (path)
                        (with (parts (string/split (canonicalise path) "%/"))
                          (cond [(= (car parts) "") ".."]
@@ -123,6 +118,7 @@
                                (map (lambda (name)
                                       (if (= (string/sub name 1 (n partial-name)) partial-name)
                                         name "nil"))))))))
+
     ;; Copy and move need to be done manually in order to support copying across mounts
     (.<! vfs :copy
          (lambda (raw-from-path raw-to-path)
@@ -151,6 +147,28 @@
     (.<! vfs :move (lambda (from-path to-path)
                      ((.> vfs :copy) from-path to-path)
                      ((.> vfs :delete) from-path)))
+
+    (.<! vfs :find
+         (lambda (wildcard)
+           (letrec [(name-matches? (lambda (name wildcard-part)
+                                     (let* [(escaped-str (escape-pattern-string wildcard-part))
+                                            (find-pattern (.. "(" (string/gsub escaped-str "%%%*" ".*") ")"))]
+                                       (string/find name find-pattern))))
+                    (find-in
+                      (lambda (dir wildcard)
+                        (let* [(wildcard-parts (string/split wildcard "/"))
+                               (name-list (struct->list ((.> vfs :list) dir)))]
+                          (flatten (map (lambda (name)
+                                          (if (name-matches? name (car wildcard-parts))
+                                            (if (> (n wildcard-parts) 1)
+                                              (if ((.> vfs :isDir) (.. dir "/" name))
+                                                (find-in (.. dir "/" name)
+                                                         (string/concat (cdr wildcard-parts) "/"))
+                                                '())
+                                              (list (.. dir "/" name)))
+                                            '()))
+                                        name-list)))))]
+              (list->struct (map (cut string/sub <> 2) (find-in "" wildcard))))))
 
     (for-each mount-str mount-strs
       (mount-fs vfs mounts mount-str))

@@ -59,6 +59,9 @@
                         (list x true))
                       xs)))
 
+(defun escape-pattern-string (str)
+  (string/gsub str "([^%w])" "%%%1"))
+
 (defmacro push-table! (xs x)
   `(.<! ,xs (+ (len# ,xs) 1) ,x))
 
