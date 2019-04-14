@@ -40,8 +40,7 @@
                   "getBundledInput" "getBundledOutput"))))
 
 (defun create-env (computer)
-  (let* [(spec (.> computer :spec))
-         (global (assoc->struct
+  (let* [(global (assoc->struct
                    (map (lambda (name)
                      (with (contents (.> _G name))
                        (list name
@@ -57,9 +56,17 @@
                  {}
                  (getmetatable a))))
     (.<! global :term (.> computer :term))
-    (.<! global :disk nil-disk)
-    (.<! global :peripheral nil-peripheral)
-    (.<! global :redstone nil-redstone)
+
+    (.<! global :disk (if (elem? "disk" (.> computer :spec :features))
+                        (.> _G :disk)
+                        nil-disk))
+    (.<! global :redstone (if (elem? "redstone" (.> computer :spec :features))
+                        (.> _G :redstone)
+                        nil-redstone))
+    (.<! global :peripheral (if (elem? "peripheral" (.> computer :spec :features))
+                        (.> _G :peripheral)
+                        nil-disk))
+
     (.<! global :bit
          { :blshift       bit32/shl
            :brshift       bit32/ashr
@@ -101,7 +108,7 @@
                      ;; TODO: Fix temporary filesystem not flushing when shutting down after a reboot
                      (.<! computer :coroutine (create-coroutine computer))) })
     (.<! global :rs (.> global :redstone))
-    (when (not (.> computer :spec :disable-networking))
+    (when (elem? "network" (.> computer :spec :features))
       (.<! global :http { :request ((.> computer :platform-libs :http-request) computer)
                           :checkURL (lambda (url)
                                       (event/queue!

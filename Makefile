@@ -2,7 +2,7 @@ URN = urn
 override COMPILEFLAGS += ./src/main.lisp -i ./src -o ./buildenv/ccbox
 override EMBEDFLAGS += -fembed-bios -fembed-json -fembed-ccfs
 override PROFILEFLAGS += --profile=stack --stack-show=flame
-override RUNFLAGS += --run -- --json ./buildenv/json.lua --boot ./buildenv/bios.lua --log ./buildenv/log.txt tw:/:./buildenv/ccfs.json
+override RUNFLAGS += --run -- --json ./buildenv/json.lua --bios ./buildenv/bios.lua --log ./buildenv/log.txt tw:/:./buildenv/ccfs.json
 
 buildenv:
 	mkdir buildenv

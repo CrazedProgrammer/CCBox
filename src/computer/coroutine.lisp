@@ -4,9 +4,7 @@
 (import embed (embedded-bios))
 
 (defun create-coroutine (computer)
-  (let* [(boot-code (if (.> computer :spec :boot-file)
-                      (read-file-force! (resolve-path (.> computer :spec :boot-file)))
-                      embedded-bios))
+  (let* [(boot-code (.> computer :spec :bios))
          (coroutine (coroutine/create (load boot-code "ccbox-bios.lua" "t" (.> computer :env))))]
     (when (> (n (.> computer :spec :startup-command)) 0)
       (resume! computer '("char" " "))

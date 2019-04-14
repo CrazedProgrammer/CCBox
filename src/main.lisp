@@ -1,10 +1,11 @@
 (import computer (create))
-(import config (args))
+(import cli (cli-args))
+(import spec (create-spec))
 (import platforms (start-runtime!))
 
 
 (defun run ()
-  (with (computer (create args))
+  (with (computer (create (create-spec cli-args)))
     (start-runtime! computer)))
 
 (run)

@@ -1,19 +1,19 @@
 (import lua/basic (_ENV _G dofile type# load))
 (import lua/os os)
 (import lua/io luaio)
-(import config (args))
+(import cli (cli-args))
 (import embed (embedded-json))
 (import io)
 
-(define version "0.2.0-pre")
+(define version "0.3.0-pre")
 
 (define write! luaio/write)
 
 (defun log! (message)
-  (when (.> args :log-file)
+  (when (.> cli-args :log-path)
     (let* [(clock (get-time!))
            (time (.. (math/floor clock) "." (string/format "%02d" (* 100 (- clock (math/floor clock))))))]
-      (io/append-all! (resolve-path (.> args :log-file)) (format nil "[{#time}] {#message}\n")))))
+      (io/append-all! (resolve-path (.> cli-args :log-path)) (format nil "[{#time}] {#message}\n")))))
 
 (defun resolve-path (path)
   (if (and (.> _ENV :shell) (.> _ENV :shell :resolve))
@@ -73,8 +73,8 @@
 
 (define json
   ((load
-    (if (.> args :json-file)
-      (io/read-all! (resolve-path (.> args :json-file)))
+    (if (.> cli-args :json-path)
+      (io/read-all! (resolve-path (.> cli-args :json-path)))
       embedded-json)
     "json.lua"
     "t")))

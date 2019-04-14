@@ -10,8 +10,8 @@
     [puc (puc/runtime/start! computer)]
     [else (error! "suitable runtime not found")]))
 
-(defun create-libs ()
-  (case (get-platform)
+(defun create-libs (platform)
+  (case platform
     [cc (cc/create-libs)]
     [puc (puc/create-libs)]
     [else (error! "suitable libraries not found")]))
