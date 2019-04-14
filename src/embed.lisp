@@ -5,10 +5,10 @@
 
 (define embedded-bios
  ,(when (flag? :embed-bios)
-    (read-all! "./testenv/bios.lua")))
+    (read-all! "./buildenv/bios.lua")))
 (define embedded-json
  ,(when (flag? :embed-json)
-    (read-all! "./testenv/json.lua")))
+    (read-all! "./buildenv/json.lua")))
 (define embedded-ccfs
  ,(when (flag? :embed-ccfs)
-    (read-all! "./testenv/ccfs.json")))
+    (read-all! "./buildenv/ccfs.json")))
