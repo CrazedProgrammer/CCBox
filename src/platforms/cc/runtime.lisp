@@ -1,6 +1,5 @@
 (import computer/event event)
 (import lua/basic (_G))
-(import util (log!))
 
 (define pull-event-raw! :hidden (.> _G :os :pullEventRaw))
 (define start-timer! :hidden (.> _G :os :startTimer))

@@ -2,7 +2,7 @@
 (import lua/io luaio)
 (import lua/os luaos)
 (import io (read-all!))
-(import util (write! log!))
+(import util (write!))
 (import util/io (run-program!))
 (import platforms/puc/input (input->events))
 

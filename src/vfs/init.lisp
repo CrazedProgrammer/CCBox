@@ -1,7 +1,7 @@
 (import lua/basic (set-idx!))
 (import vfs/ccfs ccfs)
 (import vfs/tmpfs tmpfs)
-(import util (log! escape-pattern-string))
+(import util (escape-pattern-string))
 
 (defun mount-path (mounts path)
   (let* [(abs-path (canonicalise path))
@@ -131,7 +131,6 @@
                  (if ((.> vfs :exists) to-path)
                    (error! "File exists")
                    (letrec [(copy-path (lambda (from to)
-                                         (log! (.. "copying " from " to " to))
                                          (if ((.> vfs :isDir) from)
                                            (progn
                                              ((.> vfs :makeDir) to)

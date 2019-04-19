@@ -1,6 +1,6 @@
 (import lua/io luaio)
 (import lua/table luatable)
-(import util (write! log! push-table!))
+(import util (write! push-table!))
 (import util/io (run-program!))
 (import math/bit32 (bit-extract))
 

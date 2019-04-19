@@ -1,5 +1,4 @@
 (import computer/coroutine (resume!))
-(import util (log!))
 
 (defun create-event-env (get-time!)
   (let* [(event-env { :next-timer-id 0

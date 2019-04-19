@@ -10,11 +10,10 @@
 
 (define write! luaio/write)
 
+;; TODO: Make logging computer-specific so name and timestamp can be added.
 (defun log! (message)
   (when (.> cli-args :log-path)
-    (let* [(clock (luaos/clock)) ; TODO: Use time from originating computer.
-           (time (.. (math/floor clock) "." (string/format "%02d" (* 100 (- clock (math/floor clock))))))]
-      (io/append-all! (resolve-path (.> cli-args :log-path)) (format nil "[{#time}] {#message}\n")))))
+    (io/append-all! (resolve-path (.> cli-args :log-path)) (.. message "\n"))))
 
 (defun get-platform ()
   (cond

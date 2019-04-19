@@ -1,4 +1,4 @@
-(import util (demand-type! log! clamp list->true-map))
+(import util (demand-type! clamp list->true-map))
 
 (define colour-to-hex :hidden
   (assoc->struct (map (lambda (colour-n)

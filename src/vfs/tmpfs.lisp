@@ -1,6 +1,6 @@
 (import lua/basic (type#))
 (import io (write-all!))
-(import util (log! json))
+(import util (json))
 (import util/io (read-file-force! resolve-path))
 (import util/embed (embedded-ccfs))
 
@@ -86,7 +86,6 @@
                            (write-contents!)) }))))))
 
 (defun open-file! (fs-tree path mode) :hidden
-  (log! (.. "open file " path " mode " mode))
   (let* [(f-mode (string/sub mode 1 1))
          (binary (= (string/sub mode 2 2) "b"))
          ((success handle)

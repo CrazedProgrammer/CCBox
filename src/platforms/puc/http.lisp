@@ -1,4 +1,3 @@
-(import util (log!))
 (import util/io (run-program!))
 (import io (write-all!))
 (import lua/os luaos)
