@@ -1,7 +1,7 @@
-(import util (log! resolve-path read-file-force!))
+(import util (log!))
 (import lua/basic (load getmetatable))
 (import lua/coroutine coroutine)
-(import embed (embedded-bios))
+(import util/embed (embedded-bios))
 
 (defun create-coroutine (computer)
   (let* [(boot-code (.> computer :spec :bios))

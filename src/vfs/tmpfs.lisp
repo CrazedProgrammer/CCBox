@@ -1,7 +1,8 @@
 (import lua/basic (type#))
-(import util (log! read-file-force! resolve-path json))
 (import io (write-all!))
-(import embed (embedded-ccfs))
+(import util (log! json))
+(import util/io (read-file-force! resolve-path))
+(import util/embed (embedded-ccfs))
 
 (define embed-ccfs-path "@embed")
 

@@ -1,5 +1,6 @@
-(import util (get-platform read-file-force! resolve-path))
-(import embed (embedded-bios))
+(import util (get-platform))
+(import util/io (read-file-force! resolve-path))
+(import util/embed (embedded-bios))
 
 (defun create-spec (args)
   (with (platform (or (.> args :platform) (get-platform)))

@@ -1,10 +1,11 @@
 (import computer/coroutine (resume!))
-(import util (get-time! log!))
+(import util (log!))
 
-(defun create-event-env ()
+(defun create-event-env (get-time!)
   (let* [(event-env { :next-timer-id 0
                       :timer-list '()
-                      :queued-events '() })]
+                      :queued-events '()
+                      :get-time! get-time! })]
     (.<! event-env :api
          { :queueEvent (lambda (&event)
                          (queue-event! event-env event))
@@ -24,7 +25,7 @@
   (push! (.> event-env :queued-events) event))
 
 (defun start-timer! (event-env timeout) :hidden
-  (let* [(trigger-time (+ (get-time!) (or timeout 0.05)))
+  (let* [(trigger-time (+ ((.> event-env :get-time!)) (or timeout 0.05)))
          (timer-id (.> event-env :next-timer-id))]
     (push! (.> event-env :timer-list)
            (list timer-id 'timer trigger-time))
@@ -47,7 +48,7 @@
 (defun tick! (computer)
   (let* [(event-env (.> computer :event-env)) ; TODO: Find a more pure way of doing this
          (queued-events (.> event-env :queued-events))
-         (current-time (get-time!))
+         (current-time ((.> event-env :get-time!)))
          (has-passed? (lambda (timer)
                         (<= (caddr timer) current-time)))]
     (.<! event-env :timer-list

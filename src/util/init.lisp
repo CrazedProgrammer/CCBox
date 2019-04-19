@@ -1,8 +1,9 @@
 (import lua/basic (_ENV _G dofile type# load))
-(import lua/os os)
+(import lua/os luaos)
 (import lua/io luaio)
 (import cli (cli-args))
-(import embed (embedded-json))
+(import util/embed (embedded-json))
+(import util/io (read-file-force! resolve-path))
 (import io)
 
 (define version "0.3.0-pre")
@@ -11,42 +12,14 @@
 
 (defun log! (message)
   (when (.> cli-args :log-path)
-    (let* [(clock (get-time!))
+    (let* [(clock (luaos/clock)) ; TODO: Use time from originating computer.
            (time (.. (math/floor clock) "." (string/format "%02d" (* 100 (- clock (math/floor clock))))))]
       (io/append-all! (resolve-path (.> cli-args :log-path)) (format nil "[{#time}] {#message}\n")))))
-
-(defun resolve-path (path)
-  (if (and (.> _ENV :shell) (.> _ENV :shell :resolve))
-    ((.> _ENV :shell :resolve) path)
-    path))
 
 (defun get-platform ()
   (cond
     [(or (.> _G :_CC_VERSION) (.> _G :_HOST)) 'cc]
     [else 'puc]))
-
-(defun read-file-force! (path)
-  (with (result (io/read-all! path))
-    (if result
-      result
-      (error! (format nil "Could not read file \"{#path}\"")))))
-
-(defun run-program! (prg)
-  (let* [(handle (luaio/popen prg))
-         (output (self handle :read "*a"))]
-    (self handle :close)
-    output))
-
-(defun get-time-raw! () :hidden
-  (case (get-platform)
-    [cc (os/clock)]
-    [puc (/ (tonumber (run-program! "date +%s%N")) 1000000000)]))
-
-(define startup-time :hidden
-  (get-time-raw!))
-
-(defun get-time! ()
-  (- (get-time-raw!) startup-time))
 
 (defun clamp (val min max)
   (cond

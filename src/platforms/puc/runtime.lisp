@@ -2,7 +2,8 @@
 (import lua/io luaio)
 (import lua/os luaos)
 (import io (read-all!))
-(import util (write! log! run-program!))
+(import util (write! log!))
+(import util/io (run-program!))
 (import platforms/puc/input (input->events))
 
 (defun get-term-size-str! ()

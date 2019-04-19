@@ -1,4 +1,5 @@
-(import util (run-program! log!))
+(import util (log!))
+(import util/io (run-program!))
 (import io (write-all!))
 (import lua/os luaos)
 (import computer/event event)

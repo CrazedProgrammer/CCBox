@@ -13,7 +13,7 @@
                      :label label
                      :running true
                      :spec spec
-                     :event-env (event/create-event-env)
+                     :event-env (event/create-event-env (.> platform-libs :os-clock))
                      :platform-libs platform-libs
                      :term (create-term (.> platform-libs :term) (elem? "advanced" (.> spec :features)))
                      :vfs (create-vfs (.> spec :vfs-mounts) (elem? "mount" (.> spec :features))) })]

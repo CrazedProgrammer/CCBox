@@ -1,13 +1,12 @@
 (import lua/basic (type# _G))
 (import math/bit32 bit32)
 (import computer/coroutine (create-coroutine))
-(import util (get-time! version))
+(import util (version))
 (import computer/event event)
 
 (define env-whitelist :hidden
         '( "type" "setfenv" "string" "load" "loadstring" "pairs" "_VERSION"
-           "ipairs" "rawequal" "xpcall" "_CC_DEFAULT_SETTINGS" "unpack" "bitop"
-           "setmetatable" "rawset" "rawget" "table" "bit32"
+           "ipairs" "rawequal" "xpcall" "_CC_DEFAULT_SETTINGS" "unpack" "bitop" "setmetatable" "rawset" "rawget" "table" "bit32"
            "_HOST" "bit" "assert" "error" "pcall"
            "tostring" "next" "tonumber" "math" "_RUNTIME" "coroutine"
            "biginteger" "getfenv" "select" "data" ))
@@ -47,7 +46,11 @@
                              (case (type contents)
                                ["table" (merge contents {})]
                                [_ contents]))))
-                     env-whitelist)))]
+                     env-whitelist)))
+         (startup-time ((.> computer :platform-libs :os-clock)))
+         (get-time! (lambda ()
+                      (- ((.> computer :platform-libs :os-clock))
+                         startup-time)))]
     (.<! global :_HOST (.. "ComputerCraft 1.80pr1.12 (CCBox " version ")"))
     (.<! global :_G global)
     (.<! global :getmetatable
