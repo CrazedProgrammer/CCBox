@@ -1,4 +1,4 @@
-(import util/io (run-program!))
+(import util/io (run-program! create-handle))
 (import io (write-all!))
 (import lua/os luaos)
 (import computer/event event)
@@ -53,12 +53,10 @@
            ((response-code response-headers) (parse-http-response (nth all-response-parts (+ n-redirect-headers 1))))
            (response (string/concat (drop all-response-parts (+ n-redirect-headers 1)) "\r\n\r\n"))
            (handle
-             { :readAll (const response)
-               :getResponseCode (const response-code)
-               :getResponseHeaders (const response-headers)
-               :close (const nil)})]
+             (merge (create-handle (.. "r" (if binary "b" "")) response)
+                    { :getResponseCode (const response-code)
+                       :getResponseHeaders (const response-headers) }))]
       (when postData
         (luaos/remove post-file-path))
-      ;; TODO: Implement proper (binary) handles
       (event/queue! computer (list "http_success" url handle))
       true)))
