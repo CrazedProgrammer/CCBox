@@ -9,25 +9,25 @@ And then simply run `ccbox`.
 You can exit a VM by running `shutdown`.  
 There are many different options available:  
 ```
-usage: ccbox [--help] [--boot BOOT-FILE] [--log LOG-FILE] [--command STARTUP-COMMAND] [--disable-net] [--enable-rs] [--enable-per] [--enable-disk] [--non-advanced] [VFS-MOUNTS...]
+usage: buildenv/ccbox.lua [--help] [--bios BIOS-PATH] [--log LOG-PATH] [--command STARTUP-COMMAND] [--features FEATURES] [--json JSON-PATH] [VFS-MOUNTS...]
 
- VFS-MOUNTS         The virtual file system mounts.
+ VFS-MOUNTS     The virtual file system mounts.
   `<attrs>:<mount>:[dir]`
-  attr: attributes. w (write), t (tempfs), c (ccfs)
+  attr: attributes. w (write), t (tmpfs), c (ccfs)
   Temp doesn't require a dir argument.
   mount: mount point (has to start with /)
   dir: host file system directory
   Can be relative to the current directory.
-  Default: cw:/:. c:/rom:/rom
- --help, -h         Show this help message
- --boot, -b         The boot file. Default: ./bios.lua
- --log, -l          The log file.
- --command, -c      The startup command.
- --disable-net, -n  Disables networking (http, socket).
- --enable-rs, -R    Enables redstone passthrough.
- --enable-per, -P   Enables peripheral passthrough.
- --enable-disk, -D  Enables disk drive passthrough.
- --non-advanced     Run as a standard (non-advanced) computer.
+  Default on CC platform: cw:/:. c:/rom:/rom
+  Default on PUC platform: tw:/:@embed
+ --help, -h     Show this help message
+ --bios, -b     The bios.lua file path.
+ --log, -l      The log file path.
+ --command, -c  The startup command.
+ --features     Enabled features, space separated.
+  Possible values: "advanced network redstone peripheral disk mount"
+  Default values: "advanced network"
+ --json         Path to a JSON library (needs to have .encode and .decode functions). Only needed when loading/saving tmpfs filesystems.
 ```
 
 # Building
@@ -36,7 +36,7 @@ Compiling is done with the [Urn](https://gitlab.com/urn/urn) compiler:
 
 # Download
 It is recommended you build this program yourself (see Building), as this download can be outdated.  
-[pastebin get PheuiSP1 ccbox.lua](https://pastebin.com/PheuiSP1)
+[`wget https://i.crzd.me/ccbox.lua`](https://i.crzd.me/ccbox.lua)
 
 # CCJam-2017
 This was originally my entry for CCJam 2017, but has since been updated.  
