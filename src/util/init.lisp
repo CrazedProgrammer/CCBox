@@ -20,6 +20,12 @@
     [(or (.> _G :_CC_VERSION) (.> _G :_HOST)) 'cc]
     [else 'puc]))
 
+(defun error->nil (fn &args)
+  (with ((ok ret) (pcall fn (splice args)))
+    (if ok
+      ret
+      nil)))
+
 (defun clamp (val min max)
   (cond
     [(< val min) min]

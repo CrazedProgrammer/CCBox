@@ -1,7 +1,7 @@
 (import lua/basic (type#))
 (import io (write-all!))
-(import util (json))
-(import util/io (read-file-force! resolve-path))
+(import util (json error->nil))
+(import util/io (read-file-force! resolve-path create-handle))
 (import util/embed (embedded-ccfs))
 
 (define embed-ccfs-path "@embed")
@@ -21,82 +21,11 @@
             child-inode
             (error! "No such file or directory")))))))
 
-(defun create-handle (methods) :hidden
-  (let* [(handle {})
-         (closed false)
-         (handle-methods
-           (merge methods
-                  { :close (lambda () (set! closed true)) })) ]
-    (do [(method-name (keys handle-methods))]
-      (.<! handle method-name
-           (lambda (&args)
-             (if (not closed)
-               ((.> handle-methods method-name) (splice args))
-               (error! "Attempt to use a closed file")))))
-    handle))
-
-(defun open-read-file! (fs-tree path binary) :hidden
-  (with (inode (access-tree! fs-tree path))
-    (if (/= (type# inode) "string")
-      (error! "Could not open file for reading")
-      (if binary
-        (with (index 1)
-          (create-handle
-            { :read (lambda ()
-                      (with (result (string/byte (string/sub inode index index)))
-                        (inc! index)
-                        result)) }))
-        (with (left-contents inode)
-          (create-handle
-            { :readLine (lambda ()
-                          (if left-contents
-                            (with (lines (string/split left-contents "\n"))
-                              (if (and (> (n lines) 1) (or (/= (n lines) 2) (/= (cadr lines) "")))
-                                (set! left-contents (string/concat (cdr lines) "\n"))
-                                (set! left-contents nil))
-                              (car lines))
-                            nil))
-              :readAll (lambda ()
-                         (with (result (or left-contents ""))
-                           (set! left-contents nil)
-                           result)) }))))))
-
-(defun open-write-file! (fs-tree path append binary) :hidden
-  (let* [(contents (if append
-                     (access-tree! fs-tree path)
-                     ""))
-         (write-contents! (lambda ()
-                            (access-tree! fs-tree path contents)))]
-    (if (/= (type# contents) "string")
-      (error! "Could not open file for writing")
-      (progn
-        (access-tree! fs-tree path contents)
-        ;; TODO: Optimise this so it doesn't traverse the tree on every write
-        (if binary
-          (create-handle
-            { :write (lambda (b)
-                       (set! contents (.. contents (string/char b)))
-                       (write-contents!)) })
-          (create-handle
-            { :write (lambda (str)
-                       (set! contents (.. contents str))
-                       (write-contents!))
-              :writeLine (lambda (str)
-                           (set! contents (.. contents str "\n"))
-                           (write-contents!)) }))))))
-
 (defun open-file! (fs-tree path mode) :hidden
-  (let* [(f-mode (string/sub mode 1 1))
-         (binary (= (string/sub mode 2 2) "b"))
-         ((success handle)
-            (pcall (lambda ()
-              (if (= f-mode "r")
-                (open-read-file! fs-tree path binary)
-                (open-write-file! fs-tree path (= f-mode "a") binary)))))]
-    (if success
-      handle
-      (splice (list nil handle)))))
-
+  (create-handle mode
+                 (error->nil access-tree! fs-tree path)
+                 (lambda (contents)
+                   (access-tree! fs-tree path contents))))
 
 (defun create (file)
   (let* [(fs-tree (if (/= file "")
