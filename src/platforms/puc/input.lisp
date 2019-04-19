@@ -145,11 +145,20 @@
         "."))
 
 (defun parse-key (key) :hidden
-  (if (.> special-key-map key)
-    (list (.> key-map (.> special-key-map key))
-          nil)
-    (list nil
-          key)))
+  (cond
+    [(.> special-key-map key) (list (list "key" (.> key-map (.> special-key-map key)) false)
+                                    (list "key_up" (.> key-map (.> special-key-map key))))]
+    [(and (>= (string/byte key) (string/byte "a")) (<= (string/byte key) (string/byte "z")))
+     (list (list "key" (.> key-map key) false)
+           (list "char" key)
+           (list "key_up" (.> key-map key)))]
+    [(and (>= (string/byte key) (string/byte "A")) (<= (string/byte key) (string/byte "Z")))
+     (list (list "key" (.> key-map "leftShift") false)
+           (list "key" (.> key-map (string/lower key)) false)
+           (list "char" key)
+           (list "key_up" (.> key-map (string/lower key)))
+           (list "key_up" (.> key-map "leftShift")))]
+    [else (list (list "char" key))]))
 
 (defun split-input (all-input) :hidden
   (let* [(idx 1)
@@ -196,12 +205,6 @@
            (with (mouse-event (mouse-input->event input))
              (when mouse-event
                (push! events mouse-event)))
-           (with (keychar (parse-key input))
-             (when keychar ; TODO: Properly handle modifier keys
-               (progn
-                 (when (car keychar)
-                   (push! events (list "key" (car keychar)))
-                   (push! events (list "key_up" (car keychar))))
-                 (when (cadr keychar)
-                   (push! events (list "char" (cadr keychar))))))))]))
+           (do [(event (parse-key input))]
+             (push! events event)))]))
     events))
