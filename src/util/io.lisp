@@ -53,23 +53,38 @@
                   (with (result (string/byte (string/sub handle-data index index)))
                     (inc! index)
                     result)) }))
-    (with (left-contents handle-data)
+    (with (left-contents (if binary
+                           handle-data
+                           ;; Convert CRLF to LF.
+                           (string/gsub handle-data "\r\n" "\n")))
       (create-closable-handle
-        { :readLine (lambda ()
-                      (if left-contents
+        { :read (lambda (n-chars)
+                  (if (/= (len# left-contents) 0)
+                    (if (and (not n-chars) binary)
+                      (with (ret-byte (string/byte left-contents 1))
+                        (set! left-contents (string/sub left-contents 2))
+                        ret-byte)
+                      (with (ret-str (string/sub left-contents 1 (or n-chars 1)))
+                        (set! left-contents (string/sub left-contents (+ (n ret-str) 1)))
+                        ret-str))
+                    nil))
+          :readLine (lambda ()
+                      (if (/= (len# left-contents) 0)
                         (with (lines (string/split left-contents "\n"))
                           (if (and (> (n lines) 1) (or (/= (n lines) 2) (/= (cadr lines) "")))
                             (set! left-contents (string/concat (cdr lines) "\n"))
-                            (set! left-contents nil))
+                            (set! left-contents ""))
                           (car lines))
                         nil))
           :readAll (lambda ()
-                     (with (result (or left-contents ""))
-                       (set! left-contents nil)
+                     (with (result left-contents)
+                       (set! left-contents "")
                        result)) }))))
 
 (defun create-write-handle (handle-data write-data! append binary) :hidden
-  (with (contents (or handle-data ""))
+  (with (contents (if append
+                    (or handle-data "")
+                    ""))
     (if binary
       (create-closable-handle
         { :write (lambda (b)
