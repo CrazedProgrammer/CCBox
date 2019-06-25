@@ -4,6 +4,12 @@ override EMBEDFLAGS += -fembed-bios -fembed-json -fembed-ccfs
 override PROFILEFLAGS += --profile=stack --stack-show=flame
 override RUNFLAGS += --run -- --json ./buildenv/json.lua --bios ./buildenv/bios.lua --log ./buildenv/log.txt tw:/:./buildenv/ccfs.json
 override REPLFLAGS += --repl
+override TESTFLAGS += -fstrict -i ./src
+
+TESTS=$(shell find tests -type f -name '*.lisp')
+
+.PHONY: buildenv build build-embed run profile-run repl \
+        test $(TESTS)
 
 buildenv:
 	mkdir buildenv
@@ -27,3 +33,10 @@ profile-run:
 
 repl:
 	$(URN) $(COMPILEFLAGS) $(REPLFLAGS)
+
+test: ${TESTS}
+
+${TESTS}:
+	$(eval TMP := $(shell mktemp -d))
+	${URN} $(basename $@) -o ${TMP} $(TESTFLAGS) $(RUNFLAGS)
+	@rm -rf ${TMP}.lisp ${TMP}.lua ${TMP}
