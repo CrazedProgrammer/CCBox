@@ -111,6 +111,7 @@
                      ;; TODO: Fix temporary filesystem not flushing when shutting down after a reboot
                      (.<! computer :coroutine (create-coroutine computer))) })
     (.<! global :rs (.> global :redstone))
+    (.<! global :fs (.> computer :vfs))
     (when (elem? "network" (.> computer :spec :features))
       (.<! global :http { :request ((.> computer :platform-libs :http-request) computer)
                           :checkURL (lambda (url)
@@ -121,5 +122,7 @@
                                           (if (string/find url "https?%:%/%/")
                                             (list true)
                                             (list false "URL malformed")))))} ))
-    (.<! global :fs (.> computer :vfs))
+    (when (elem? "testlog" (.> computer :spec :features))
+      (.<! global :testlog { :write (lambda (data)
+                                      (push! (.> computer :testlog) data)) } ))
     global))

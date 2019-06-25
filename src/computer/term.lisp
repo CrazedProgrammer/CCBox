@@ -138,3 +138,10 @@
               :setBackgroundColor (.> term :setBackgroundColour)
               :getPaletteColor (.> term :getPaletteColour)
               :setPaletteColor (.> term :setPaletteColour) })))
+
+(define nil-term
+  { :getSize (const (splice (list 100 100)))
+    :setCursorPos (const nil)
+    :setCursorBlink (const nil)
+    :scroll (const nil)
+    :setPaletteColour (const nil) })
