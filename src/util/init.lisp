@@ -20,6 +20,11 @@
     [(or (.> _G :_CC_VERSION) (.> _G :_HOST)) 'cc]
     [else 'puc]))
 
+(defun time->daytime (time)
+  (splice (list
+            (mod (/ time 60) 24)
+            (math/floor (/ time 60 24)))))
+
 (defun error->nil (fn &args)
   (with ((ok ret) (pcall fn (splice args)))
     (if ok

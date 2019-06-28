@@ -9,11 +9,15 @@
   (let* [(cid 0)
          (label (format nil "computer-{#cid}"))
          (platform-libs (create-libs (.> spec :platform)))
+         (startup-time ((.> platform-libs :os-clock)))
+         (get-time! (lambda ()
+                      (- ((.> platform-libs :os-clock))
+                         startup-time)))
          (computer { :id cid
                      :label label
                      :running true
                      :spec spec
-                     :event-env (event/create-event-env (.> platform-libs :os-clock))
+                     :event-env (event/create-event-env get-time!)
                      :platform-libs platform-libs
                      :term (if (elem? "nil-term" (.> spec :features))
                              nil-term

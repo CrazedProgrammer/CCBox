@@ -1,7 +1,7 @@
 (import lua/basic (type# _G))
 (import math/bit32 bit32)
 (import computer/coroutine (create-coroutine))
-(import util (version))
+(import util (version time->daytime))
 (import computer/event event)
 
 (define env-whitelist :hidden
@@ -47,10 +47,7 @@
                                ["table" (merge contents {})]
                                [_ contents]))))
                      env-whitelist)))
-         (startup-time ((.> computer :platform-libs :os-clock)))
-         (get-time! (lambda ()
-                      (- ((.> computer :platform-libs :os-clock))
-                         startup-time)))]
+         (get-time! (.> computer :event-env :get-time!))]
     (.<! global :_HOST (.. "ComputerCraft 1.80pr1.12 (CCBox " version ")"))
     (.<! global :_G global)
     (.<! global :getmetatable
@@ -102,9 +99,11 @@
            :cancelAlarm (.> computer :event-env :api :cancelAlarm)
            :clock get-time!
            :time (lambda ()
-                   (mod (/ (get-time!) 60) 24))
+                   (with ((time day) (time->daytime (get-time!)))
+                     time))
            :day (lambda ()
-                  (math/floor (/ (get-time!) 60 24)))
+                  (with ((time day) (time->daytime (get-time!)))
+                    day))
            :shutdown (lambda () (.<! computer :running false))
            :reboot (lambda ()
                      ;; TODO: Find a nice way to refresh the screen when rebooting

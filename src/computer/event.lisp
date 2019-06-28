@@ -1,4 +1,5 @@
 (import computer/coroutine (resume!))
+(import util (time->daytime))
 
 (defun create-event-env (get-time!)
   (let* [(event-env { :next-timer-id 0
@@ -13,27 +14,26 @@
            :cancelTimer (lambda (timer-id)
                           (cancel-timer! event-env timer-id))
            :setAlarm (lambda (game-time)
-                       ;;(set-alarm! event-env game-time))
-                       (error! "alarms are currently not supported"))
+                       (set-alarm! event-env game-time))
            :cancelAlarm (lambda (timer-id)
-                          ;;(cancel-timer! event-env timer-id))
-                          (error! "alarms are currently not supported")) } )
+                          (cancel-timer! event-env timer-id)) } )
     event-env))
 
 (defun queue-event! (event-env event) :hidden
   (push! (.> event-env :queued-events) event))
 
-(defun start-timer! (event-env timeout) :hidden
+(defun start-timer! (event-env timeout is-alarm) :hidden
   (let* [(trigger-time (+ ((.> event-env :get-time!)) (or timeout 0.05)))
          (timer-id (.> event-env :next-timer-id))]
     (push! (.> event-env :timer-list)
-           (list timer-id 'timer trigger-time))
+           (list timer-id (if is-alarm 'alarm 'timer) trigger-time))
     (inc! (.> event-env :next-timer-id))
     timer-id))
 
-(defun set-alarm! (event-env timeout) :hidden
-  ;; TODO: Implement alarms
-  )
+(defun set-alarm! (event-env time) :hidden
+  (let* [((current-time current-day) (time->daytime ((.> event-env :get-time!))))
+         (delay-time (mod (- time current-time) 24))]
+    (start-timer! event-env (* delay-time 60) true)))
 
 (defun cancel-timer! (event-env timer-id) :hidden
   (.<! event-env :timer-list
@@ -53,7 +53,8 @@
     (.<! event-env :timer-list
          (filter (lambda (timer)
                    (if (has-passed? timer)
-                     (progn (push! (.> event-env :queued-events) (list "timer" (car timer)))
+                     (progn (push! (.> event-env :queued-events)
+                                   (list (symbol->string (cadr timer)) (car timer)))
                             false)
                      true))
                  (.> event-env :timer-list)))
