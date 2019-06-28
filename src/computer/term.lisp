@@ -66,15 +66,17 @@
          :isColour (const is-colour)
 
          :getTextColour (lambda ()
-                         text-colour)
+                          text-colour)
          :getBackgroundColour (lambda ()
-                         background-colour)
+                                background-colour)
          :setTextColour (lambda (colour)
-                          (assert-colour! colour is-colour)
-                          (set! text-colour colour))
+                          (when (/= colour text-colour)
+                            (assert-colour! colour is-colour)
+                            (set! text-colour colour)))
          :setBackgroundColour (lambda (colour)
-                          (assert-colour! colour is-colour)
-                          (set! background-colour colour))
+                                (when (/= colour background-colour)
+                                  (assert-colour! colour is-colour)
+                                  (set! background-colour colour)))
          :getPaletteColour (lambda (colour)
                              (assert-colour! colour is-colour)
                              (splice (.> colour-palette colour)))
@@ -126,18 +128,18 @@
     ((.> native-term :setCursorBlink) cursor-blink)
     ;; Apply default palette to native terminal
     (do [(colour (if is-colour
-                  supported-colours
-                  supported-bw-colours))]
+                   supported-colours
+                   supported-bw-colours))]
       ((.> term :setPaletteColour) colour))
     ;; Add aliases
     (merge term
            { :isColor (.> term :isColour)
-              :getTextColor (.> term :getTextColour)
-              :getBackgroundColor (.> term :getBackgroundColour)
-              :setTextColor (.> term :setTextColour)
-              :setBackgroundColor (.> term :setBackgroundColour)
-              :getPaletteColor (.> term :getPaletteColour)
-              :setPaletteColor (.> term :setPaletteColour) })))
+             :getTextColor (.> term :getTextColour)
+             :getBackgroundColor (.> term :getBackgroundColour)
+             :setTextColor (.> term :setTextColour)
+             :setBackgroundColor (.> term :setBackgroundColour)
+             :getPaletteColor (.> term :getPaletteColour)
+             :setPaletteColor (.> term :setPaletteColour) })))
 
 (define nil-term
   { :getSize (const (splice (list 100 100)))
