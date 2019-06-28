@@ -108,7 +108,7 @@
                        (with (parts (string/split (canonicalise path) "%/"))
                          (cond [(= (car parts) "") ".."]
                                [(= (n parts) 1) ""]
-                               [else (cadr (reverse parts))]))))
+                               [else (string/concat (init parts) "/")]))))
     (.<! vfs :complete (lambda (partial-name path include-files include-slashes)
                          (if (not ((.> wrapped-funs :isDir)))
                            {}
