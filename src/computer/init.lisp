@@ -20,7 +20,7 @@
                      :event-env (event/create-event-env get-time!)
                      :platform-libs platform-libs
                      :term (if (elem? "nil-term" (.> spec :features))
-                             nil-term
+                             (create-term nil-term (elem? "advanced" (.> spec :features)))
                              (create-term (.> platform-libs :term) (elem? "advanced" (.> spec :features))))
                      :vfs (create-vfs (.> spec :vfs-mounts) (elem? "mount" (.> spec :features))) })]
       (when (elem? "testlog" (.> spec :features))

@@ -142,8 +142,9 @@
              :setPaletteColor (.> term :setPaletteColour) })))
 
 (define nil-term
-  { :getSize (const (splice (list 100 100)))
+  { :getSize (lambda () (splice (list 100 100)))
     :setCursorPos (const nil)
     :setCursorBlink (const nil)
     :scroll (const nil)
-    :setPaletteColour (const nil) })
+    :setPaletteColour (const nil)
+    :blit (const nil) })
