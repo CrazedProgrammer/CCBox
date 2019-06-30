@@ -2,8 +2,29 @@
 ComputerCraft emulator written in Urn.  
 Designed to be able to run on multiple Lua platforms (ComputerCraft, POSIX + Lua 5.1/5.2/5.3/JIT).
 
+# Building
+Compiling is done with the [Urn](https://gitlab.com/urn/urn) compiler.  
+
+There is a Makefile for easy building and running. It can also download
+supplementary files you will need to run CCBox.
+
+The CCBox build environment uses a directory, `buildenv`, to store the output
+Lua executable and all the required files for compilation.
+If this is the first time you're building CCBox, you should run `make buildenv`
+to fetch the required files.
+
+To build CCBox in the normal configuration, run `make` or `make build`.  
+To build CCBox with an embedded filesystem and libraries, run `make build-embed`.  
+The output Lua executable will be located at `buildenv/ccbox.lua`.
+
+To run CCBox with Urn stack traces, run `make run`.  
+To profile CCBox with a function time graph, run `make run-profile`.
+
 # How to use
-Get a boot file ([bios.lua](https://github.com/dan200/ComputerCraft/blob/master/src/main/resources/assets/computercraft/lua/bios.lua)):  
+
+The simplest way to run CCBox in the terminal is to run `make run`.
+
+To run CCBox inside of CC, get a boot file ([bios.lua](https://github.com/dan200/ComputerCraft/blob/master/src/main/resources/assets/computercraft/lua/bios.lua)):  
 `wget https://raw.githubusercontent.com/dan200/ComputerCraft/master/src/main/resources/assets/computercraft/lua/bios.lua bios.lua`  
 And then simply run `ccbox`.  
 You can exit a VM by running `shutdown`.  
@@ -29,10 +50,6 @@ usage: buildenv/ccbox.lua [--help] [--bios BIOS-PATH] [--log LOG-PATH] [--comman
   Default values: "advanced network"
  --json         Path to a JSON library (needs to have .encode and .decode functions). Only needed when loading/saving tmpfs filesystems.
 ```
-
-# Building
-Compiling is done with the [Urn](https://gitlab.com/urn/urn) compiler:  
-`cd src; urn main.lisp -o ccbox`
 
 # Download
 It is recommended you build this program yourself (see Building), as this download can be outdated.  

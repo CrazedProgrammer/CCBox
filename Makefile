@@ -8,12 +8,13 @@ override TESTFLAGS += -fstrict -i ./src
 
 TESTS=$(shell find tests -type f -name '*.lisp')
 
+.DEFAULT_GOAL := build
 .PHONY: buildenv build build-embed run profile-run repl \
         test $(TESTS)
 
 buildenv:
 	mkdir buildenv
-	curl https://i.crzd.me/ccfs.json -o buildenv/ccfs.json
+	cp assets/ccfs.json buildenv/ccfs.json
 	curl https://raw.githubusercontent.com/dan200/ComputerCraft/master/src/main/resources/assets/computercraft/lua/bios.lua -o buildenv/bios.lua
 	curl https://raw.githubusercontent.com/rxi/json.lua/master/json.lua -o buildenv/json.lua
 
@@ -26,7 +27,7 @@ build-embed:
 run:
 	$(URN) $(COMPILEFLAGS) $(RUNFLAGS)
 
-profile-run:
+run-profile:
 	$(URN) $(COMPILEFLAGS) $(PROFILEFLAGS) $(RUNFLAGS) | tee /tmp/urn-output
 	cat /tmp/urn-output | tail -n +2 | flamegraph.pl > ./buildenv/profile.svg
 	rm /tmp/urn-output
