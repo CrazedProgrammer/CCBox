@@ -15,24 +15,29 @@
 (defun decode (str)
   ((.> json :decode) str))
 
-; TODO: Make a lookup table for this.
-(defun char->quoted (code)
-  (cond [(= code #x22) "\\\""]
-        [(= code #x5C) "\\\\"]
-        [(= code #x0A) "\\n"]
-        [(= code #x0D) "\\r"]
-        [(< code #x20) (string/format "\\u%04x" code)]
-        [else (string/char code)]))
+(define char->quoted :hidden
+  (assoc->struct
+    (map
+      (lambda (code)
+        (list
+          (string/char code)
+          (cond [(= code #x22) "\\\""]
+                [(= code #x5C) "\\\\"]
+                [(= code #x0A) "\\n"]
+                [(= code #x0D) "\\r"]
+                [(< code #x20) (string/format "\\u%04x" code)]
+                [else (string/char code)])))
+      (range :from 0 :to 255))))
 
-(defun quoted (str)
+(defun quoted (str) :hidden
   (.. "\""
       (string/concat
         (map (lambda (c)
-               (char->quoted (string/byte c)))
+               (.> char->quoted c))
              (string/split str "")))
       "\""))
 
-(defun assoc->str (assoc)
+(defun assoc->str (assoc) :hidden
   (.. (quoted (car assoc))
       ":"
       (encode (cadr assoc))))
