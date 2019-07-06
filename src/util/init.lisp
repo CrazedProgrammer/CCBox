@@ -53,11 +53,3 @@
     (when (/= (type# val) typename)
       (log! error-message))
     (demand (= (type# val) typename) error-message)))
-
-(define json
-  ((load
-    (if (.> cli-args :json-path)
-      (io/read-all! (resolve-path (.> cli-args :json-path)))
-      embedded-json)
-    "json.lua"
-    "t")))
