@@ -5,5 +5,7 @@
 (defun create-libs ()
   { :term (term/create)
     :http-request http/request
-    :os-clock (lambda ()
-                (/ (tonumber (run-program! "date +%s%N")) 1000000000)) })
+    :os-clock get-time! })
+
+(defun get-time! ()
+  (/ (tonumber (run-program! "date +%s%N")) 1000000000))
