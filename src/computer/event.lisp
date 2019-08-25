@@ -1,5 +1,5 @@
 (import computer/coroutine (resume!))
-(import util (time->daytime log!))
+(import util (time->daytime))
 
 (defun create-event-env (get-time!)
   (let* [(event-env { :next-timer-id 0
@@ -50,7 +50,6 @@
          (current-time ((.> event-env :get-time!)))
          (has-passed? (lambda (timer)
                         (<= (caddr timer) current-time)))]
-    (log! (.. "tick at: " current-time))
     (.<! event-env :timer-list
          (filter (lambda (timer)
                    (if (has-passed? timer)
