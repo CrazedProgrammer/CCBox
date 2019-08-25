@@ -1,4 +1,4 @@
-(import lua/basic (type# _G))
+(import lua/basic (type# len# load _G))
 (import math/bit32 bit32)
 (import computer/coroutine (create-coroutine))
 (import util (version time->daytime))
@@ -37,6 +37,23 @@
           (list {} "getSides")
           (list 0 "getAnalogInput" "getAnalogOutput"
                   "getBundledInput" "getBundledOutput"))))
+
+(defun undo-deprecations! (global) :hidden
+  ;; Undo deprecations made by Lua 5.2/5.3
+  (when (not (.> global :unpack))
+    (.<! global :unpack (.> global :table :unpack)))
+  (when (not (.> global :math :pow))
+    (.<! global :math :pow ((load "return function(a, b) return a ^ b end"))))
+  ;; math.atan also takes two arguments in Lua 5.3
+  (when (not (.> global :math :atan2))
+    (.<! global :math :atan2 (.> global :math :atan)))
+  (when (not (.> global :table :getn))
+    (.<! global :table :getn (lambda (t)
+                               (or (.> t :n)
+                                   (len# t)))))
+  (when (not (.> global :table :setn))
+    (.<! global :table :setn (lambda (t n)
+                               (.<! t :n n)))))
 
 (defun create-env (computer)
   (let* [(global (assoc->struct
@@ -88,6 +105,8 @@
            :replace       bit32/bit-replace
            :lrotate       bit32/bit-rotl
            :rrotate       bit32/bit-rotr })
+    (undo-deprecations! global)
+
     (.<! global :os
          { :getComputerID (lambda () (.> computer :id))
            :getComputerLabel (lambda () (.> computer :label))
