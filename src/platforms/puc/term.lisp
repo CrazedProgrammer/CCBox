@@ -67,10 +67,10 @@
              (background-c (string/sub background-blit i i))]
         (when (/= current-text text-c)
           (push-table! buffer
-                       (.. "\x1b[38:5:" (.> palette-colour256-str (.> fallback-color-char-map text-c)) "m")))
+                       (.. "\x1b[38;5;" (.> palette-colour256-str (.> fallback-color-char-map text-c)) "m")))
         (when (/= current-background background-c)
           (push-table! buffer
-                       (.. "\x1b[48:5:" (.> palette-colour256-str (.> fallback-color-char-map background-c)) "m")))
+                       (.. "\x1b[48;5;" (.> palette-colour256-str (.> fallback-color-char-map background-c)) "m")))
         (push-table! buffer str-c)))
     (luatable/concat buffer "")))
 
