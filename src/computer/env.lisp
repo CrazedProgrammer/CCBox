@@ -38,19 +38,29 @@
           (list 0 "getAnalogInput" "getAnalogOutput"
                   "getBundledInput" "getBundledOutput"))))
 
+;;; Undoes deprecations made by Lua 5.2/5.3
 (defun undo-deprecations! (global) :hidden
-  ;; Undo deprecations made by Lua 5.2/5.3
-  (when (not (.> global :unpack))
-    (.<! global :unpack (.> global :table :unpack)))
   (when (not (.> global :math :pow))
-    (.<! global :math :pow ((load "return function(a, b) return a ^ b end"))))
-  ;; math.atan also takes two arguments in Lua 5.3
+    (.<! global :math :pow expt))
+  ;; math.atan and math.log take two arguments in Lua 5.3
   (when (not (.> global :math :atan2))
     (.<! global :math :atan2 (.> global :math :atan)))
+  (when (not (.> global :math :log10))
+    (.<! global :math :log10 (cut math/log <> 10)))
+  (when (not (.> global :math :ldexp))
+    (.<! global :math :ldexp
+         (lambda (x exp)
+           (* x (expt 2 exp)))))
+  ;; TODO: Implement sinh, cosh, tanh and frexp
+
+  (when (not (.> global :unpack))
+    (.<! global :unpack (.> global :table :unpack)))
   (when (not (.> global :table :getn))
     (.<! global :table :getn (lambda (t)
                                (or (.> t :n)
                                    (len# t)))))
+  (when (not (.> global :table :maxn))
+    (.<! global :table :maxn (.> global :table :getn)))
   (when (not (.> global :table :setn))
     (.<! global :table :setn (lambda (t n)
                                (.<! t :n n)))))
