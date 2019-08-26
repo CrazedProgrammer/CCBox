@@ -1,7 +1,7 @@
 (import compiler (flag?))
 (import io (read-all!))
 
-;;; Allows for embedding things like bios.lua into the CCBox binary itself
+;;; Allows for embedding things like bios.lua into the CCBox executable itself
 
 (define embedded-bios
  ,(when (flag? :embed-bios)

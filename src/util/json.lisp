@@ -8,7 +8,8 @@
   ((load
     (if (.> cli-args :json-path)
       (read-all! (resolve-path (.> cli-args :json-path)))
-      embedded-json)
+      (or embedded-json
+          (exit! "--json argument is required" 1)))
     "json.lua"
     "t")))
 
