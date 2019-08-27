@@ -1,8 +1,8 @@
 URN = urn
 override COMPILEFLAGS += ./src/main.lisp -i ./src -o ./buildenv/ccbox
-override EMBEDFLAGS += -fembed-bios -fembed-json -fembed-ccfs
+override EMBEDFLAGS += -fembed-bios -fembed-ccfs
 override PROFILEFLAGS += --profile=stack --stack-show=flame
-override RUNFLAGS += --run -- --json ./buildenv/json.lua --bios ./buildenv/bios.lua --log ./buildenv/log.txt tw:/:./buildenv/ccfs.json
+override RUNFLAGS += --run -- --bios ./buildenv/bios.lua --log ./buildenv/log.txt tw:/:./buildenv/ccfs.json
 override REPLFLAGS += --repl
 override TESTFLAGS += -fstrict -i ./src
 
@@ -16,7 +16,6 @@ buildenv:
 	mkdir buildenv
 	cp assets/ccfs.json buildenv/ccfs.json
 	curl https://raw.githubusercontent.com/dan200/ComputerCraft/master/src/main/resources/assets/computercraft/lua/bios.lua -o buildenv/bios.lua
-	curl https://raw.githubusercontent.com/rxi/json.lua/master/json.lua -o buildenv/json.lua
 
 build:
 	$(URN) $(COMPILEFLAGS)

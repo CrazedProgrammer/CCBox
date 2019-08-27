@@ -2,7 +2,6 @@
 (import lua/os luaos)
 (import lua/io luaio)
 (import cli (cli-args))
-(import util/embed (embedded-json))
 (import util/io (read-file-force! resolve-path))
 (import io)
 

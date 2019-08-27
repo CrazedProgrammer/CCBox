@@ -55,7 +55,7 @@
                     result)) }))
     (with (left-contents (if binary
                            handle-data
-                           ;; Convert CRLF to LF.
+                           ;; Convert CRLF to LF
                            (string/gsub handle-data "\r\n" "\n")))
       (create-closable-handle
         { :read (lambda (n-chars)

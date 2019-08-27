@@ -30,7 +30,7 @@ And then simply run `ccbox`.
 You can exit a VM by running `shutdown`.  
 There are many different options available:  
 ```
-usage: buildenv/ccbox.lua [--help] [--bios BIOS-PATH] [--log LOG-PATH] [--command STARTUP-COMMAND] [--features FEATURES] [--json JSON-PATH] [VFS-MOUNTS...]
+usage: buildenv/ccbox.lua [--help] [--bios BIOS-PATH] [--log LOG-PATH] [--command STARTUP-COMMAND] [--features FEATURES] [VFS-MOUNTS...]
 
  VFS-MOUNTS     The virtual file system mounts.
   `<attrs>:<mount>:[dir]`
@@ -48,7 +48,6 @@ usage: buildenv/ccbox.lua [--help] [--bios BIOS-PATH] [--log LOG-PATH] [--comman
  --features     Enabled features, space separated.
   Possible values: "advanced network redstone peripheral disk mount"
   Default values: "advanced network"
- --json         Path to a JSON library (needs to have .encode and .decode functions). Only needed when loading/saving tmpfs filesystems.
 ```
 
 # Download

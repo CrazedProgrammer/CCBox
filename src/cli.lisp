@@ -36,9 +36,4 @@
                      Default values: \"advanced network\""
             :narg 1)
 
-          (add-argument! spec '("--json")
-            :name "json-path"
-            :help "Path to a JSON library (needs to have .encode and .decode functions). Only needed when loading/saving tmpfs filesystems."
-            :narg 1)
-
           (parse! spec)))

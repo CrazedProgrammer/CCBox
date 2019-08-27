@@ -1,20 +1,60 @@
-(import cli (cli-args))
-(import util/embed (embedded-json))
 (import lua/basic (load type#))
-(import util/io (resolve-path))
-(import io (read-all!))
 
-(define json :hidden
-  ((load
-    (if (.> cli-args :json-path)
-      (read-all! (resolve-path (.> cli-args :json-path)))
-      (or embedded-json
-          (exit! "--json argument is required" 1)))
-    "json.lua"
-    "t")))
+;; Only decodes tables, arrays and strings
+;; On malformed input, may throw an error or give malformed output
+(defun json->lua (str) :hidden
+  (let* ([buffer '()]
+         [idx 1]
+         [bracket-array-stack '()]
+         [inside-string false])
+    (while (<= idx (n str))
+      (with (str-char (string/sub str idx idx))
+        (if inside-string
+          (case str-char
+            ["\\" (progn
+                    (push! buffer "\\")
+                    (inc! idx)
+                    (with (escape-char (string/sub str idx idx))
+                      (case escape-char
+                        ["u" (progn
+                               ;; Since Lua doesn't handle UTF-8 natively, limit the character to the ASCII/Latin-1 charset
+                               (push! buffer (string/format "%03d" (tonumber (string/sub str (+ idx 3) (+ idx 4)) 16)))
+                               (set! idx (+ idx 4)))]
+                        [else (push! buffer escape-char)])))]
+            ["\"" (progn (push! buffer "\"")
+                         (set! inside-string false))]
+            [else (push! buffer str-char)])
+          (case str-char
+            ;; Ignore whitespace
+            [" " nil]
+            ["\n" nil]
+            ["\r" nil]
+            ["\t" nil]
+
+            ["{" (progn (if (= (string/sub str (+ idx 1) (+ idx 1)) "}")
+                          (push! buffer "{")
+                          (push! buffer "{["))
+                        (push! bracket-array-stack false))]
+            ["[" (progn (push! buffer "{")
+                        (push! bracket-array-stack true))]
+            ["}" (progn
+                   (push! buffer "}")
+                   (pop-last! bracket-array-stack))]
+            ["]" (progn
+                   (push! buffer "}")
+                   (pop-last! bracket-array-stack))]
+            [":" (push! buffer "]=")]
+            ["," (if (last bracket-array-stack)
+                   (push! buffer ",")
+                   (push! buffer ",["))]
+            ["\"" (progn (push! buffer "\"")
+                         (set! inside-string true))]
+            [else (push! buffer str-char)])))
+      (inc! idx))
+    (string/concat buffer)))
 
 (defun decode (str)
-  ((.> json :decode) str))
+  ((load (.. "return " (json->lua str)))))
 
 (define char->quoted :hidden
   (assoc->struct
