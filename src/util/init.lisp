@@ -1,4 +1,4 @@
-(import lua/basic (_ENV _G dofile type# load))
+(import lua/basic (_ENV _G dofile type# len# load))
 (import lua/os luaos)
 (import lua/io luaio)
 (import cli (cli-args))
@@ -40,6 +40,9 @@
   (assoc->struct (map (lambda (x)
                         (list x true))
                       xs)))
+
+(defun push-raw! (t x)
+  (.<! t (+ (len# t) 1) x))
 
 (defun escape-pattern-string (str)
   (string/gsub str "([^%w])" "%%%1"))
