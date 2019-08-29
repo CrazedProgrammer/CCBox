@@ -2,13 +2,12 @@
 (import lua/table luatable)
 (import util (push-raw!))
 
-;; Only decodes tables, arrays and strings
+;; Only decodes tables and strings
 ;; On malformed input, may throw an error or give malformed output
 (defun json->lua (str) :hidden
   (let* ([buffer {}]
          [push-buffer! (cut push-raw! buffer <>)]
          [idx 1]
-         [bracket-array-stack '()]
          [inside-string false])
     (while (<= idx (n str))
       (with (str-char (string/sub str idx idx))
@@ -34,22 +33,13 @@
             ["\r" nil]
             ["\t" nil]
 
-            ["{" (progn (if (= (string/sub str (+ idx 1) (+ idx 1)) "}")
-                          (push-buffer! "{")
-                          (push-buffer! "{["))
-                        (push! bracket-array-stack false))]
-            ["[" (progn (push-buffer! "{")
-                        (push! bracket-array-stack true))]
+            ["{" (if (= (string/sub str (+ idx 1) (+ idx 1)) "}")
+                   (push-buffer! "{")
+                   (push-buffer! "{["))]
             ["}" (progn
-                   (push-buffer! "}")
-                   (pop-last! bracket-array-stack))]
-            ["]" (progn
-                   (push-buffer! "}")
-                   (pop-last! bracket-array-stack))]
+                   (push-buffer! "}"))]
             [":" (push-buffer! "]=")]
-            ["," (if (last bracket-array-stack)
-                   (push-buffer! ",")
-                   (push-buffer! ",["))]
+            ["," (push-buffer! ",[")]
             ["\"" (progn (push-buffer! "\"")
                          (set! inside-string true))]
             [else (push-buffer! str-char)])))
