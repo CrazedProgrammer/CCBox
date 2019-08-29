@@ -64,26 +64,32 @@
                 [else (string/char code)])))
       (range :from 0 :to 255))))
 
-(defun quoted (str) :hidden
-  (.. "\""
-      (string/concat
-        (map (lambda (c)
-               (.> char->quoted c))
-             (string/split str "")))
-      "\""))
-
-(defun assoc->str (assoc) :hidden
-  (.. (quoted (car assoc))
-      ":"
-      (encode (cadr assoc))))
-
-; TODO: Optimise.
 (defun encode (data)
-  (if (= (type# data) "string")
-    (quoted data)
-    (.. "{"
-        (string/concat
-          (map assoc->str
-               (struct->assoc data))
-          ",")
-        "}")))
+  (letrec ([buffer {}]
+           [push-buffer! (cut push-raw! buffer <>)]
+           [encode-string!
+             (lambda (str)
+               (push-buffer! "\"")
+               (for idx 1 (len# str) 1
+                 (push-buffer! (.> char->quoted (string/sub str idx idx))))
+               (push-buffer! "\""))]
+           [encode-table!
+             (lambda (table)
+               (push-buffer! "{")
+               (let* [(table-keys (keys table))
+                      (table-n-keys (n table-keys))]
+                 (for idx 1 table-n-keys 1
+                   (let* [(table-key (.> table-keys idx))
+                          (table-value (.> table table-key))]
+                     (encode-string! table-key)
+                     (push-buffer! ":")
+                     (encode-value! table-value)
+                     (when (/= idx table-n-keys)
+                       (push-buffer! ",")))))
+               (push-buffer! "}"))]
+           [encode-value! (lambda (value)
+                            (if (= (type# value) "string")
+                              (encode-string! value)
+                              (encode-table! value)))])
+    (encode-value! data)
+    (luatable/concat buffer)))
