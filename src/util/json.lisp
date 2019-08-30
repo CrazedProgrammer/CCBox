@@ -1,12 +1,12 @@
 (import lua/basic (load type#))
 (import lua/table luatable)
-(import util (push-raw!))
+(import util (push-table!))
 
 ;; Only decodes tables and strings
 ;; On malformed input, may throw an error or give malformed output
 (defun json->lua (str) :hidden
   (let* ([buffer {}]
-         [push-buffer! (cut push-raw! buffer <>)]
+         [push-buffer! (cut push-table! buffer <>)]
          [idx 1]
          [inside-string false])
     (while (<= idx (n str))
@@ -66,7 +66,7 @@
 
 (defun encode (data)
   (letrec ([buffer {}]
-           [push-buffer! (cut push-raw! buffer <>)]
+           [push-buffer! (cut push-table! buffer <>)]
            [encode-string!
              (lambda (str)
                (push-buffer! "\"")

@@ -41,9 +41,6 @@
                         (list x true))
                       xs)))
 
-(defun push-raw! (t x)
-  (.<! t (+ (len# t) 1) x))
-
 (defun escape-pattern-string (str)
   (string/gsub str "([^%w])" "%%%1"))
 

@@ -5,6 +5,7 @@
 (import util (write!))
 (import util/io (run-program!))
 (import platforms/puc/input (input->events))
+(import platforms/puc/term (flush-write-buffer!))
 (import platforms/puc (get-time!))
 
 (define target-tick-interval :hidden 0.05)
@@ -43,6 +44,9 @@
               (event/queue! computer (list "term_resize")))))
         ;; Run events
         (event/tick! computer)
+        ;; Flush write buffer
+        (flush-write-buffer!)
+        ;; Sleep until the tick has taken 50ms
         (with (sleep-time (- target-tick-interval (- (get-time!) start-time)))
           (when (> sleep-time 0)
             (luaos/execute (string/format "sleep %03f" sleep-time)))))

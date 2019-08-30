@@ -1,3 +1,4 @@
+(import lua/basic (len#))
 (import lua/io luaio)
 (import lua/table luatable)
 (import util (write! push-table!))
@@ -7,6 +8,21 @@
 ;; TODO: Limit the amount of entries in the blit-cache table
 (define blit-cache :hidden { })
 (define blit-cache-max-chars :hidden 3)
+
+(define write-buffer { })
+(define write-buffer-max-entries 4096)
+
+(defun flush-write-buffer! ()
+  (write! (luatable/concat write-buffer))
+  (for idx 1 (len# write-buffer) 1
+    (.<! write-buffer idx nil)))
+
+;; Buffer writes to reduce the amount of slow system calls
+(defun buffered-write! (str) :hidden
+  (with (write-buffer-size-inc (+ (len# write-buffer) 1))
+    (.<! write-buffer write-buffer-size-inc str)
+    (when (= write-buffer-size-inc write-buffer-max-entries)
+      (flush-write-buffer!))))
 
 ;; TODO: Find some way to draw 6-cell characters instead of 4-cell characters
 (defun block-char->unicode (code) :hidden
@@ -80,20 +96,21 @@
                  (splice (list (tonumber (run-program! "tput cols"))
                                (tonumber (run-program! "tput lines")))))
       :setCursorPos (lambda (x y)
-                      (write! (.. "\x1b[" (tostring y) ";" (tostring x) "H")))
+                      (buffered-write! (.. "\x1b[" (tostring y) ";" (tostring x) "H")))
       :setCursorBlink (lambda (blink)
-                        (write! (if blink
-                                  "\x1b[?25h"
-                                  "\x1b[?25l")))
+                        (buffered-write!
+                          (if blink
+                            "\x1b[?25h"
+                            "\x1b[?25l")))
       :blit (lambda (str-blit text-blit background-blit)
               (if (<= (string/len str-blit) blit-cache-max-chars)
                 (with (blit-key (.. str-blit text-blit background-blit))
                   (if (.> blit-cache blit-key)
-                    (write! (.> blit-cache blit-key))
+                    (buffered-write! (.> blit-cache blit-key))
                     (with (calculated-term-output (term-blit-output palette-colour256-str str-blit text-blit background-blit))
                       (.<! blit-cache blit-key calculated-term-output)
-                      (write! calculated-term-output))))
-                (write! (term-blit-output palette-colour256-str str-blit text-blit background-blit))))
+                      (buffered-write! calculated-term-output))))
+                (buffered-write! (term-blit-output palette-colour256-str str-blit text-blit background-blit))))
       :scroll (lambda (lines)
                 (if (>= lines 0)
                   (.. "\x1b[" lines "S")
